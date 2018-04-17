@@ -1,0 +1,108 @@
+.detail{
+  width: 7.5rem;
+  overflow: scroll;
+  padding-bottom: 1.5rem;
+  background: #fff;
+  ul{
+    width: 7.5rem;
+    overflow: hidden;
+    li{
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+      display: flex;
+      padding: .3rem .2rem;
+      border-bottom: 0.01rem solid #eaeaea;
+      .select{
+        width:0.83rem;
+        height: 1.62rem;
+        margin-right: .2rem;
+        position: relative;
+        .check{
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          margin-left: -.2rem;
+          margin-top: -.2rem;
+          width: .4rem;
+          height: .4rem;
+          background: url("../../../static/images/shopCollect/select.png") no-repeat #fff;
+          background-size: .4rem .4rem;
+          &.cur{
+            background-image: url("../../../static/images/shopCollect/select-bg.png");
+          }
+        }
+        input{
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          margin-left: -.2rem;
+          margin-top: -.2rem;
+          width: .4rem;
+          height: .4rem;
+          opacity: 0;
+        }
+      }
+      .wrap{
+        display: flex;
+        .img{
+          width: 2.16rem;
+          margin-right:.2rem;
+          img{
+            width: 2.16rem;
+            height: 1.62rem;
+          }
+        }
+        .msg{
+          width: 4.74rem;
+          position: relative;
+          .price{
+            position: absolute;
+            right: .3rem;
+            top: .3rem;
+            font-size: .34rem;
+            color: #e8584f;
+            align-self: center;
+            font-weight: 500;
+            span{
+              margin-left: .05rem;
+              font-size: .2rem;
+              font-weight: normal;
+            }
+          }
+          h4{
+            padding-top: .15rem;
+            height: .3rem;
+            font-size: .3rem;
+            line-height: .3rem;
+            color: #333;
+            font-weight:bold;
+          }
+          p{
+            width: 3rem;
+            font-size: .24rem;
+            line-height: .24rem;
+            height: .24rem;
+            padding: .25rem 0 .2rem;
+            overflow: hidden;
+            text-overflow:ellipsis;
+            white-space: nowrap;
+            color: #aaa;
+          }
+          .tags{
+            span{
+              display: inline-block;
+              width: 1.06rem;
+              height: .32rem;
+              line-height: .36rem;
+              text-align: center;
+              border: 0.01rem solid #64aaff;
+              color: #64aaff;
+              font-size: .22rem;
+              margin-right: .12rem;
+            }
+          }
+        }
+
+      }
+    }
+  }
+}
