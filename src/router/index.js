@@ -22,6 +22,7 @@ import Login from '@/components/login/login.vue'
 import Search from '@/components/search/search.vue'
 // 会员部分
 import Buymember from '@/components/mine/buymember.vue'
+import BuymemberH5 from '@/components/mine/buymemberH5.vue'
 // 已注册会员
 import Goodmember from '@/components/mine/goodmember.vue'
 // 我的订单
@@ -30,6 +31,8 @@ import Order from '@/components/mine/order.vue'
 import Payment from '@/components/mine/payment.vue'
 // 我的收藏
 import Collect from '@/components/mine/collect.vue'
+// 我的消息
+import Message from '@/components/mine/message.vue'
 // 关于优铺
 import AboutUP from '@/components/mine/aboutUP.vue'
 // 资讯详情
@@ -42,23 +45,20 @@ import TurnShop from '@/components/home/turnShop.vue'
 Vue.use(Router)
 
 const router =  new Router({
-  // mode: "history",
+  mode: "history",
   scrollBehavior: ()=>({y:0}),
   routes: [
     {path: '/', name:'navBar',redirect: "/home",component: NavBar,
         children:[
           {path: '/home',component: Home},
-          {path: '/lookShop',component: LookShop},
+          {
+            path: '/lookShop',
+            component: LookShop,
+            name: "lookShop",
+            meta: {keepAlive: true}
+           },
           {path: '/mine',component: Mine}
         ]
-    },
-    /*商铺详情*/
-    {
-      path: '/shopDetail',
-      // meta: {
-      //   requireAuth: true,  // 添加该字段，表示进入这个路由是需要登录的
-      // },
-      component: ShopDetail
     },
     /*商铺筛选更多*/
     {
@@ -76,7 +76,12 @@ const router =  new Router({
     },
     {
       path: '/buymember',
+      name: 'buymember',
       component: Buymember
+    },
+    {
+      path: '/buymemberH5',
+      component: BuymemberH5
     },
     {
       path: '/goodmember',
@@ -96,6 +101,11 @@ const router =  new Router({
     {
       path: '/collect',
       component: Collect
+    },
+    // 我的消息
+    {
+      path: '/message',
+      component: Message
     },
     // 关于优铺
     {
@@ -127,29 +137,16 @@ const router =  new Router({
       path: '/turnShop',
       component: TurnShop
     }
-  ]
-})
-
-// 页面刷新时，重新赋值token
-if (window.localStorage.getItem('token')) {
-  store.commit("login", window.localStorage.getItem('token'))
-}
-
-router.beforeEach((to, from, next) => {
-  if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
-    if (store.state.mutations.token) {  // 通过vuex state获取当前的token是否存在
-      next();
-    }
-    else {
-      next({
-        path: '/login',
-        query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
-      })
+  ],
+  scrollBehavior (to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      if (from.meta.keepAlive) {
+        from.meta.savedPosition = Number(localStorage.scrollTop);
+      }
+      return { x: 0, y: to.meta.savedPosition || 0}
     }
   }
-  else {
-    next();
-  }
 })
-
 export default router;

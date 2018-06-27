@@ -34,7 +34,7 @@
               </tr>
               <tr v-for="(item,index) in fuwu">
                 <td>{{item.vip}}</td>
-                <td>{{item.price}}</td>
+                <td>{{item.price}}元</td>
                 <td>{{item.month}}  <span @click="fuwubuy(item)">购买</span></td>
               </tr>
             </table>
@@ -50,9 +50,7 @@
       data(){
         return{
           tab:0,
-          android: "",
-          mine: "",
-          news: "",
+          ios: "",
           msg: [
             {huiyuan:"1个月会员",price:300,id:1},
             {huiyuan:"3个月会员",price:500,id:2},
@@ -68,38 +66,31 @@
         }
       },
       mounted(){
-        this.android = getUrlId("id");
-        this.mine = getUrlId("mine");
-        this.news = this.$route.query.news;
-        if(this.android == 0){
+        this.ios = getUrlId("id");
+        if(this.ios == 1){
           $(".back").hide()
-        }else if(this.android == 1){
+        }else if(this.ios == 2){
+          this.tab = 1;
           $(".back").hide()
-          this.tab = 1;
-        }else if(this.news){
-          this.tab = 1;
         }
       },
       methods:{
         back(){
-          if(this.mine){
-            this.$router.push({path:"/mine"})
-          }else{
-            this.$router.go(-1)
-          }
+          this.$router.go(-1);
         },
         huiyuanbuy(item){
-          if(this.android){
-            return AndroidBuy.showToast(item.id);
+          console.log(item.id)
+          if(this.ios){
+            window.location.href="next://" + item.id;
           }else{
-            this.$router.push({path:"/payment",query:{"id":item.id,"price":item.price}})
+            window.location.href="tel:4008988808"
           }
         },
         fuwubuy(item){
-          if(this.android){
-            return AndroidBuy.showToast(item.id);
+          if(this.ios){
+            window.location.href="next://" + item.id;
           }else{
-            this.$router.push({path:"/payment",query:{"id":item.id,"price":item.price}})
+            window.location.href="tel:4008988808"
           }
         }
       }
@@ -137,7 +128,7 @@
   .buy{
     width: 7.5rem;
     margin: 0 auto;
-    background: #fff;
+    overflow: hidden;
     .title{
       width: 100%;
       height: 1rem;

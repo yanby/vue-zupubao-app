@@ -1,7 +1,14 @@
 <template>
     <div class="lookShop">
+      <div class="backTop" @click.stop="backTopFun()"></div>
       <div class="title">
-        <h2>商铺 <router-link to="/search"></router-link></h2>
+        <div class="grayNab">
+          <dl class="grayNab_left" @click="goSearch()">
+            <h5><span>北京</span></h5>
+            <dt><img src="../../../static/images/home/search2.png"></dt>
+            <dd>区域/商圈/业态/商铺编号</dd>
+          </dl>
+        </div>
         <div class="shaixuan">
           <div class="list">
             <div @click="tab1($event)" :class="{'cur':tab===0}">区域 <span></span></div>
@@ -58,21 +65,28 @@
       </div>
 
       <div class="shoplist" v-show="yes===1">
-        <div class="detail" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
+        <!--<div class="detail" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">-->
+        <div class="detail" ref="wrapper">
           <mt-loadmore :top-method="loadTop" :bottom-method="loadBottom" @bottom-status-change="handleBottomChange"
                        ref="loadmore" :bottom-all-loaded="allLoaded" :auto-fill="false">
             <ul>
-              <li v-for="(item,index) in shopMsg" @click="go(item.id)">
-                <div class="wrap">
+              <li v-for="(item,index) in shopMsg" @click="go(item.id,index)">
+                <div class="wrap" v-if="index!=3 && index!=9">
                   <div class="img">
-                    <img :src="item.img" alt="">
+                    <img :src="item.img" alt="" :onerror="defaultImg">
                   </div>
                   <div class="msg">
                     <h4>{{item.title}}</h4>
                     <p>{{item.shopName}}</p>
-                    <div class="tags" v-if="item.shopTags"><span v-for="(item1,index1) in item.shopTags">{{item1}}</span></div>
+                    <div class="tags" v-if="item.shopTags"><span v-if="index1 < 3" v-for="(item1,index1) in item.shopTags">{{item1}}</span></div>
                     <div class="price">{{item.monthlyRent}}<span>{{item.unit}}</span></div>
                   </div>
+                </div>
+                <div class="wrap" v-if="index===9" @click.stop="zhuanFun()">
+                    <img src="../../../static/images/lookShop/zhuan.png" alt="" style="width: 7.09rem;height: 1.93rem;">
+                </div>
+                <div class="wrap" v-if="index===3" @click.stop="zhaoFun()">
+                    <img src="../../../static/images/lookShop/zhao.png" alt="" style="width: 7.09rem;height: 1.93rem;">
                 </div>
               </li>
             </ul>
@@ -88,11 +102,13 @@
           <p>暂无信息</p>
         </dl>
       </div>
+      <div class="shopWrite" v-show="shopMsg.length > 4"></div>
     </div>
 </template>
 
 <script>
   import qs from 'qs';
+  import { Indicator } from 'mint-ui';
   export default {
     data() {
       return {
@@ -117,119 +133,250 @@
         search: "",
         screen: "", //筛选id
         screenKey: "",//筛选id
-        key: ""
+        key: "",
+        quyuID: "",
+        yetaiID: "",
+        mianjiID: "",
+        jiageID: "",
+        nextSearch: "",
+        homeMore: "",//首页查看更多
+        defaultImg: 'this.src="' + require('../../../static/images/lookShop/err.png') + '"'
       };
     },
-    created(){
-      var that = this;
-      this.screenKey = this.$route.query.screenKey;
-      this.screen = this.$route.query.screen;
-
-      this.search = this.$route.query.search;
-
-      if(this.$route.query.search){
-        var data = {
-          search: this.search
+    beforeRouteLeave(to,from,next){
+      let position = $(window).scrollTop();
+      localStorage.setItem("scrollTop",position);
+      if(to.path == "/shopDetail"){
+        if(!from.meta.keepAlive){
+          from.meta.keepAlive = true;
         }
-        this.$http.all([
-          this.$http.post(this.changeData() + "/shop/getSearch",qs.stringify(data)),
-          this.$http.post(this.changeData() + '/shop/getShopList')
-        ]).then(this.$http.spread(function (resSearch, reaList) {
-          // 上面两个请求都完成后，才执行这个回调方法
-          that.shopMsg = resSearch.data.content;
-          that.area = reaList.data.areas;
-          that.yetai = reaList.data.shopBusinessTypes;
-          that.mianji = reaList.data.mg;
-          that.price = reaList.data.prices;
-          that.next = reaList.data.next;
-          })
-        );
-      }else if(this.$route.query.screenKey){
-        if(this.screenKey == "businessCircleId"){
-          var data1 = {
-            businessCircleId : this.screen
-          }
-        }else if(this.screenKey == "businessTypeId"){
-          var data1 = {
-            businessTypeId : this.screen
-          }
-        }else if(this.screenKey == "areaId"){
-          var data1 = {
-            areaId : this.screen
-          }
-        }else if(this.screenKey == "priceId"){
-          var data1 = {
-            priceId : this.screen
-          }
-        }
-        this.$http.post(this.changeData() + '/shop/getShopList',qs.stringify(data1)).then(function(res){
-          console.log(res)
-          this.shopMsg = res.data.content;
-          this.area = res.data.areas;
-          this.yetai = res.data.shopBusinessTypes;
-          this.mianji = res.data.mg;
-          this.price = res.data.prices;
-          this.next = res.data.next;
-        }.bind(this)).catch(function(err){
-          console.log("商店列表页面错误：",err)
-        })
+        next();
       }else{
-        this.$http.post(this.changeData() + '/shop/getShopList').then(function(res){
-          console.log(res)
-          this.shopMsg = res.data.content;
-          this.area = res.data.areas;
-          this.yetai = res.data.shopBusinessTypes;
-          this.mianji = res.data.mg;
-          this.price = res.data.prices;
-          this.next = res.data.next;
-        }.bind(this)).catch(function(err){
-          console.log("商店列表页面错误：",err)
-        })
+        from.meta.keepAlive = false;
+        to.meta.keepAlive = false;
+        next();
+        window.location.reload()
       }
+    },
+    created(){
+      this.init();
     },
     mounted() {
 
+      this.screenKey = this.$route.query.screenKey;
+      this.screen = this.$route.query.screen;
+      this.search = this.$route.query.search;
+      this.homeMore = this.$route.params.more;
+      console.log(this.homeMore)
+
+      if(this.search){
+        var data = {
+          search: this.search
+        }
+        Indicator.open({
+          text: '',
+          spinnerType: 'fading-circle'
+        });
+        setTimeout(function () {
+          Indicator.close();
+        },2000)
+         this.$http.post(this.changeData() + '/shop/getSearch',qs.stringify(data)).then(function(res){
+        //this.$http.post('http://192.168.1.157:8200/shop/getSearch',qs.stringify(data)).then(function(res){
+          //console.log(res)
+          this.shopMsg = res.data.content;
+          this.nextSearch = res.data.next;
+        }.bind(this)).catch(function(err){
+          console.log("商店列表页面错误：",err)
+        })
+      }else if(this.homeMore){
+        Indicator.open({
+          text: '',
+          spinnerType: 'fading-circle'
+        });
+        setTimeout(function () {
+          Indicator.close();
+        },2000)
+      }
+      // else if(this.$route.query.screenKey){
+      //   if(this.screenKey == "businessCircleId"){
+      //     this.quyuID = this.screen;
+      //     var data1 = {
+      //       businessCircleId : this.quyuID
+      //     }
+      //   }else if(this.screenKey == "businessTypeId"){
+      //     this.yetaiID = this.screen;
+      //     var data1 = {
+      //       businessTypeId : this.screen
+      //     }
+      //   }else if(this.screenKey == "areaId"){
+      //     this.mianjiID = this.screen;
+      //     var data1 = {
+      //       areaId : this.screen
+      //     }
+      //   }else if(this.screenKey == "priceId"){
+      //     this.jiageID = this.screen;
+      //     var data1 = {
+      //       priceId : this.screen
+      //     }
+      //   }
+      //   this.$http.post(this.changeData() + '/shop/getShopList',qs.stringify(data1)).then(function(res){
+      //     // console.log(res)
+      //     this.shopMsg = res.data.content;
+      //     this.next = res.data.next;
+      //   }.bind(this)).catch(function(err){
+      //     console.log("商店列表页面错误：",err)
+      //   })
+      // }
+
     },
     updated(){
-      this.wrapperHeight = document.documentElement.clientHeight - this.$refs.wrapper.getBoundingClientRect().top;
+      // this.wrapperHeight = document.documentElement.clientHeight - this.$refs.wrapper.getBoundingClientRect().top;
     },
     methods: {
-      loadTop(){
-        var that = this;
-        setTimeout(function () {
-          that.$http.post(that.changeData() + '/shop/getShopList').then(function(res){
-            console.log(res)
-            that.shopMsg = res.data.content;
-            that.area = res.data.areas;
-            that.yetai = res.data.shopBusinessTypes;
-            that.mianji = res.data.mg;
-            that.price = res.data.prices;
-            that.next = res.data.next;
-            that.$refs.loadmore.onTopLoaded();
-          }.bind(that)).catch(function(err){
-            console.log("商店列表页面错误：",err)
-          })
-        },2000)
+      errFun(){
+        this.src = ""
       },
-      loadBottom() {
-        var that = this;
-        var data = {
-          next: this.next
-        }
-        if(this.next == null){
-          this.allLoaded = true;
-          this.$refs.loadmore.onBottomLoaded();
-        }else{
-          that.allLoaded = false;
+      zhuanFun(){
+        this.$router.push({path:"/turnShop"})
+      },
+      zhaoFun(){
+        this.$router.push({path:"/seekShop"})
+      },
+      goSearch(){
+        this.$router.push({path:"/search"})
+      },
+      backTopFun(){
+        document.body.scrollTop = 0
+        document.documentElement.scrollTop = 0
+      },
+      init(){
+        if(this.homeMore){
+          Indicator.open({
+            text: '',
+            spinnerType: 'fading-circle'
+          });
           setTimeout(function () {
-            that.$http.post(that.changeData() + '/shop/getUpLoadShopList',qs.stringify(data)).then(function(res){
-              that.next = res.data.next;
-              that.shopMsg = that.shopMsg.concat(res.data.content)
-              that.$refs.loadmore.onBottomLoaded();
-            }.bind(that)).catch(function(err){
-              console.log("商店列表页面错误：",err)
-            })
+            Indicator.close();
           },2000)
+        }
+        this.$http.post(this.changeData() + '/shop/getShopList').then(function(res){
+          console.log(res)
+          if(this.screenKey == null && this.search == null){
+            this.shopMsg = res.data.content;
+          }
+
+          this.area = res.data.areas;
+          this.yetai = res.data.shopBusinessTypes;
+          this.mianji = res.data.mg;
+          this.price = res.data.prices;
+          this.next = res.data.next;
+
+        }.bind(this)).catch(function(err){
+          console.log("商店列表页面错误：",err)
+        })
+      },
+      loadTop(){//下拉刷新
+        $(".shoplist ul li").removeClass("cur");
+        var that = this;
+        if(this.search){
+          var data = {
+            search : this.search,
+            next: this.nextSearch
+          }
+          if(this.next == null){
+            this.allLoaded = true;
+            // this.$refs.loadmore.onTopLoaded();
+          }else{
+            that.allLoaded = false;
+            setTimeout(function () {
+              that.$http.post(that.changeData() + '/shop/getSearch',qs.stringify(data)).then(function(res){
+                //that.$http.post('http://192.168.1.157:8200/shop/getSearch',qs.stringify(data)).then(function(res){
+                that.nextSearch = res.data.next;
+                //console.log(res.data.content)
+                that.shopMsg = that.shopMsg.concat(res.data.content)
+                that.$refs.loadmore.onTopLoaded();
+              }.bind(that)).catch(function(err){
+                console.log("商店列表页面错误：",err)
+              })
+            },2000)
+          }
+        }else{
+          var data = {
+            businessCircleId : this.quyuID,
+            businessTypeId : this.yetaiID,
+            areaId : this.mianjiID,
+            priceId : this.jiageID,
+            search: this.search
+          }
+          if(this.next == null){
+            this.allLoaded = true;
+            // this.$refs.loadmore.onTopLoaded();
+          }else {
+            that.allLoaded = false;
+            setTimeout(function () {
+              that.$http.post(that.changeData() + '/shop/getShopList', qs.stringify(data)).then(function (res) {
+                //console.log(res)
+                that.shopMsg = res.data.content;
+                that.area = res.data.areas;
+                that.yetai = res.data.shopBusinessTypes;
+                that.mianji = res.data.mg;
+                that.price = res.data.prices;
+                that.next = res.data.next;
+                that.$refs.loadmore.onTopLoaded();
+              }.bind(that)).catch(function (err) {
+                console.log("商店列表页面错误：", err)
+              })
+            }, 2000)
+          }
+        }
+      },
+      loadBottom() {//上拉加载
+        var that = this;
+        if(this.search){
+          var data = {
+            search : this.search,
+            next: this.nextSearch
+          }
+          if(this.next == null){
+            this.allLoaded = true;
+            // this.$refs.loadmore.onBottomLoaded();
+          }else{
+            that.allLoaded = false;
+            setTimeout(function () {
+              that.$http.post(that.changeData() + '/shop/getSearch',qs.stringify(data)).then(function(res){
+              //that.$http.post('http://192.168.1.157:8200/shop/getSearch',qs.stringify(data)).then(function(res){
+                that.nextSearch = res.data.next;
+                //console.log(res.data.content)
+                that.shopMsg = that.shopMsg.concat(res.data.content)
+                that.$refs.loadmore.onBottomLoaded();
+              }.bind(that)).catch(function(err){
+                console.log("商店列表页面错误：",err)
+              })
+            },2000)
+          }
+        }else{
+          var data = {
+            businessCircleId : this.quyuID,
+            businessTypeId : this.yetaiID,
+            areaId : this.mianjiID,
+            priceId : this.jiageID,
+            next: this.next
+          }
+          if(this.next == null){
+            this.allLoaded = true;
+            // this.$refs.loadmore.onBottomLoaded();
+          }else{
+            that.allLoaded = false;
+            setTimeout(function () {
+              that.$http.post(that.changeData() + '/shop/getShopList',qs.stringify(data)).then(function(res){
+                that.next = res.data.next;
+                that.shopMsg = that.shopMsg.concat(res.data.content)
+                that.$refs.loadmore.onBottomLoaded();
+              }.bind(that)).catch(function(err){
+                console.log("商店列表页面错误：",err)
+              })
+            },2000)
+          }
         }
       },
       handleBottomChange(){
@@ -241,18 +388,14 @@
           },2000)
         }
       },
-      go(id){
-        // if(this.search){
-        //   this.$router.push({path:"/shopDetail",query:{shopId: id,search: this.search}})
-        // }else if(this.screenKey){
-        if(this.key){
-          this.$router.push({path:"/shopDetail",query:{shopId: id,screenKey: this.key,screen: this.screen,search: this.search}})
-        }else{
-          this.$router.push({path:"/shopDetail",query:{shopId: id,screenKey: this.screenKey,screen: this.screen,search: this.search}})
-        }
+      go(id,index){
+          $(".shoplist ul li").eq(index).addClass("cur");
+          this.$router.push({path:"/shopDetail",query:{shopId: id}})
 
+        // if(this.key){
+        //   this.$router.push({path:"/shopDetail",query:{shopId: id,screenKey: this.key,screen: this.screen,search: this.search}})
         // }else{
-        //   this.$router.push({path:"/shopDetail",query:{shopId: id}})
+        //   this.$router.push({path:"/shopDetail",query:{shopId: id,screenKey: this.screenKey,screen: this.screen,search: this.search}})
         // }
       },
       tab1(e){
@@ -308,16 +451,35 @@
         $(e.srcElement).parent(".twoChild").addClass("cur").siblings().removeClass("cur");
       },
       quyuChildFun(e,item){
-        var data = {
-          businessCircleId: item.childId
-        }
         this.key = "businessCircleId";
+        this.quyuID = item.childId;
         this.screen = item.childId;
         $(e.srcElement).addClass("cur").siblings().removeClass("cur");
+        var data = {
+          businessCircleId : this.quyuID,
+          businessTypeId : this.yetaiID,
+          areaId : this.mianjiID,
+          priceId : this.jiageID,
+          next: this.next
+        }
         this.$http.post(this.changeData() + "/shop/getShopList",qs.stringify(data)).then(function(res){
-          console.log(res)
+          $(".shoplist ul li").removeClass("cur");
+          Indicator.open({
+            text: '',
+            spinnerType: 'fading-circle'
+          });
+          setTimeout(function () {
+            Indicator.close();
+          },2000)
+          //console.log(res)
           if(res.data.code == 200){
             this.shopMsg = res.data.content;
+            this.next = res.data.next;
+            // this.quyuID = "";
+            // this.yetaiID = "";
+            // this.mianjiID = "";
+            // this.jiageID = "";
+            // this.search = "";
             this.tab = "";
             this.$refs.modal.style.display = "none";
             if(this.shopMsg.length==0){
@@ -325,6 +487,7 @@
             }else{
               this.yes = 1;
             }
+            window.scrollTo(0, 0);
           }
         }.bind(this)).catch(function(err){
           console.log("商店列表页面错误：",err)
@@ -335,16 +498,37 @@
         $(e.srcElement).parent(".twoChild").addClass("cur").siblings().removeClass("cur");
       },
       yetaiChildFun(e,item){
-        var data = {
-          businessTypeId: item.childId
-        }
         this.key = "businessTypeId";
+        this.yetaiID = item.childId;
         this.screen = item.childId;
         $(e.srcElement).addClass("cur").siblings().removeClass("cur");
+        var data = {
+          businessCircleId : this.quyuID,
+          businessTypeId : this.yetaiID,
+          areaId : this.mianjiID,
+          priceId : this.jiageID,
+          next: this.next
+        }
         this.$http.post(this.changeData() + "/shop/getShopList",qs.stringify(data)).then(function(res){
+          $(".shoplist ul li").removeClass("cur");
           if(res.data.code == 200){
-            this.shopMsg = res.data.content;
             console.log(res)
+
+            Indicator.open({
+              text: '',
+              spinnerType: 'fading-circle'
+            });
+            setTimeout(function () {
+              Indicator.close();
+            },2000)
+
+            this.shopMsg = res.data.content;
+            this.next = res.data.next;
+            // this.quyuID = "";
+            // this.yetaiID = "";
+            // this.mianjiID = "";
+            // this.jiageID = "";
+            // this.search = "";
             this.tab = "";
             this.$refs.modal.style.display = "none";
             if(this.shopMsg.length==0){
@@ -352,21 +536,41 @@
             }else{
               this.yes = 1;
             }
+            window.scrollTo(0, 0);
           }
         }.bind(this)).catch(function(err){
-          console.log("商店列表页面错误：",err)
+          //console.log("商店列表页面错误：",err)
         })
       },
       mianjiFun(e,item){
-        var data = {
-          areaId: item.id
-        }
         this.key = "areaId";
+        this.mianjiID = item.id;
         this.screen = item.id;
         $(e.srcElement).addClass("cur").siblings().removeClass("cur");
+        var data = {
+          businessCircleId : this.quyuID,
+          businessTypeId : this.yetaiID,
+          areaId : this.mianjiID,
+          priceId : this.jiageID,
+          next: this.next
+        }
         this.$http.post(this.changeData() + "/shop/getShopList",qs.stringify(data)).then(function(res){
+          $(".shoplist ul li").removeClass("cur");
           if(res.data.code == 200){
+            Indicator.open({
+              text: '',
+              spinnerType: 'fading-circle'
+            });
+            setTimeout(function () {
+              Indicator.close();
+            },2000)
             this.shopMsg = res.data.content;
+            this.next = res.data.next;
+            // this.quyuID = "";
+            // this.yetaiID = "";
+            // this.mianjiID = "";
+            // this.jiageID = "";
+            // this.search = "";
             console.log(res)
             this.tab = "";
             this.$refs.modal.style.display = "none";
@@ -376,6 +580,7 @@
               this.yes = 1;
             }
           }
+          window.scrollTo(0, 0);
         }.bind(this)).catch(function(err){
           console.log("商店列表页面错误：",err)
         })
@@ -385,16 +590,35 @@
         $(e.srcElement).parent(".twoChild").addClass("cur").siblings().removeClass("cur");
       },
       priceChildFun(e,item){
-        var data = {
-          priceId: item.childId
-        }
         this.key = "priceId";
+        this.jiageID = item.childId;
         this.screen = item.childId;
-        console.log(item.childId)
+        //console.log(item.childId)
         $(e.srcElement).addClass("cur").siblings().removeClass("cur");
+        var data = {
+          businessCircleId : this.quyuID,
+          businessTypeId : this.yetaiID,
+          areaId : this.mianjiID,
+          priceId : this.jiageID,
+          next: this.next
+        }
         this.$http.post(this.changeData() + "/shop/getShopList",qs.stringify(data)).then(function(res){
           if(res.data.code == 200){
+            Indicator.open({
+              text: '',
+              spinnerType: 'fading-circle'
+            });
+            setTimeout(function () {
+              Indicator.close();
+            },2000)
+            $(".shoplist ul li").removeClass("cur");
             this.shopMsg = res.data.content;
+            // this.quyuID = "";
+            // this.yetaiID = "";
+            // this.mianjiID = "";
+            // this.search = "";
+            // this.jiageID = "";
+            this.next = res.data.next;
             this.tab = "";
             this.$refs.modal.style.display = "none";
             if(this.shopMsg.length==0){
@@ -403,6 +627,7 @@
               this.yes = 1;
             }
           }
+          window.scrollTo(0, 0);
         }.bind(this)).catch(function(err){
           console.log("商店列表页面错误：",err)
         })
@@ -420,37 +645,115 @@
 
 <style scoped lang="scss" type="text/scss">
   @import "../../../static/css/shopList.scss";
+  input::-webkit-input-placeholder{
+    color: #ccc;
+  }
+  input::-moz-placeholder{   /* Mozilla Firefox 19+ */
+    color: #ccc;
+  }
+  input:-moz-placeholder{    /* Mozilla Firefox 4 to 18 */
+    color: #ccc;
+  }
+  input:-ms-input-placeholder{  /* Internet Explorer 10-11 */
+    color:  #ccc;
+  }
+
   .lookShop{
     width:7.5rem;
     margin: 0 auto;
-    .detail{
-      padding-bottom: 1rem;
+    background: #fff;
+    .backTop{
+      width: .9rem;
+      height: .9rem;
+      position: fixed;
+      right: .5rem;
+      bottom: 2.74rem;
+      z-index: 1000;
+      background: url("../../../static/images/lookShop/top.png") no-repeat;
+      -webkit-background-size: .9rem .9rem;
+      background-size: .9rem .9rem;
+    }
+    .shopWrite{
+      width: 7.5rem;
+      height: 1rem;
+      background: #fff;
     }
     .title{
       position: fixed;
       /*left: 0;*/
       top: 0;
       z-index: 2000;
-      h2{
-        text-align: center;
-        font-size: .34rem;
-        height: .9rem;
-        line-height: .9rem;
-        color: #333;
-        font-weight:bold;
-        position: relative;
+      .grayNab {
+        width: 7.5rem;
+        height: .76rem;
+        padding-top: .2rem;
         background: #fff;
-        a{
-          -webkit-tap-highlight-color: rgba(0,0,0,0);
-          position: absolute;
-          width: .36rem;
-          height: .36rem;
-          background: url("../../../static/images/common/search.png") no-repeat;
-          background-size: .36rem .36rem;
-          top: .25rem;
-          right: .3rem;
+
+        .grayNab_left {
+          float: left;
+          width: 6.3rem;
+          height: .56rem;
+          color: #ccc;
+          font-size: 0.24rem;
+          margin-left: .55rem;
+          border-radius: 6px;
+          border: 1px solid #f0f1f2;
+          background: #f0f1f3;
+          h5 {
+            height: .36rem;
+            float: left;
+            font-size: .24rem;
+            margin-left: .14rem;
+            padding-right: .15rem;
+            margin-right: .15rem;
+            border-right: 1px solid #ccc;
+            margin-top: .1rem;
+            span {
+              display: inline-block;
+              position: relative;
+              top: -.04rem;
+            }
+          }
+          dt {
+            float: left;
+            img {
+              width: .26rem;
+              height: .26rem;
+              position: relative;
+              top: .01rem;
+              margin-right: .1rem;
+            }
+          }
+          dd {
+
+            float: left;
+            line-height: .6rem;
+            font-size: .24rem;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+          }
         }
       }
+
+      /*h2{*/
+        /*text-align: center;*/
+        /*font-size: .34rem;*/
+        /*height: .9rem;*/
+        /*line-height: .9rem;*/
+        /*color: #333;*/
+        /*font-weight:bold;*/
+        /*position: relative;*/
+        /*background: #fff;*/
+        /*a{*/
+          /*-webkit-tap-highlight-color: rgba(0,0,0,0);*/
+          /*position: absolute;*/
+          /*width: .36rem;*/
+          /*height: .36rem;*/
+          /*background: url("../../../static/images/common/search.png") no-repeat;*/
+          /*background-size: .36rem .36rem;*/
+          /*top: .25rem;*/
+          /*right: .3rem;*/
+        /*}*/
+      /*}*/
       .shaixuan{
         position: relative;
         width: 7.5rem;
@@ -467,14 +770,15 @@
             width: 25%;
             height: .8rem;
             line-height: .8rem;
-            font-size: .24rem;
+            font-size: .3rem;
             justify-content: space-around;
             text-align: center;
             background: #fff;
             border-bottom: .01rem solid #eaeaea;
             &.cur{
+              color: #7bb5ff;
               span{
-                background: url("../../../static/images/lookShop/up.png") no-repeat;
+                background: url("../../../static/images/lookShop/up-bg.png") no-repeat ;
                 background-size: .14rem .1rem;
               }
             }
@@ -484,7 +788,7 @@
               height: .1rem;
               background: url("../../../static/images/lookShop/down.png") no-repeat;
               background-size: .14rem .1rem;
-              vertical-align: middle;
+              vertical-align: .06rem;
             }
           }
         }
@@ -547,15 +851,15 @@
               .two{
                 -webkit-tap-highlight-color: rgba(0,0,0,0);
                 background: #fff;
-                width: 1.36rem;
+                width: 2.95rem;
                 height: 5rem;
-                padding: 0 0.44rem 0 .7rem;
                 border-right: .01rem solid #eaeaea;
                 overflow: scroll;
                 .twoChild{
+                  text-align: center;
                   height: .78rem;
                   line-height: .78rem;
-                  font-size: .26rem;
+                  font-size: .3rem;
                   border-bottom: .01rem solid #fff;
                   &.cur{
                     span{
@@ -563,24 +867,24 @@
                       width: 100%;
                       height: 100%;
                       color: #7bb5ff;
-                      border-bottom: .01rem solid #7bb5ff;
                     }
                   }
                   .three{
                     -webkit-tap-highlight-color: rgba(0,0,0,0);
                     background: #fff;
-                    width: 4.29rem;
+                    width: 4rem;
                     height: 5rem;
-                    padding-left: .7rem;
+                    padding-left: .54rem;
                     position: absolute;
-                    left: 2.5rem;
+                    left: 2.96rem;
                     top: 0;
+                    text-align: left;
                     background: #f7f8fa;
                     overflow: scroll;
                     li{
                       height: .78rem;
                       line-height: .78rem;
-                      font-size: .26rem;
+                      font-size: .3rem;
                       &.cur{
                         color: #7bb5ff;
                       }
@@ -596,15 +900,15 @@
                 width: 7.5rem;
                 overflow: auto;
                 &>li{
-                  margin-left: .7rem;
+                  margin-left: .55rem;
                   height: .78rem;
                   margin-right: .4rem;
                   line-height: .78rem;
-                  font-size: .26rem;
+                  font-size: .3rem;
                   border-bottom: .01rem solid #fff;
                   &.cur{
                     color: #7bb5ff;
-                    border-bottom: .01rem solid #7bb5ff;
+                    /*border-bottom: .01rem solid #7bb5ff;*/
                   }
                 }
               }
@@ -626,7 +930,7 @@
         background: rgba(0,0,0,.3);
       }
     .shoplist{
-      padding-top: 1.71rem;
+      padding-top: 1.77rem;
     }
     .noOrder{
       padding-top: 1.5rem;

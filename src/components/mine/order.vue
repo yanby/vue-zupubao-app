@@ -1,177 +1,75 @@
 <template>
     <div class="order">
 
-        <div style="display: none;">
+        <div class="yesOrder">
             <div class="orderTop">
+              <div class="clearfix">
                 <i>
-                    <router-link to='/mine'>
-                        <img src="../../../static/images/mine/back.png">
-                    </router-link>
+                  <router-link to='/mine'>
+                    <img src="../../../static/images/mine/back.png">
+                  </router-link>
                 </i>
                 <h3>我的订单</h3>
-                <div class="orderNav">
-                    <ul>
-                        <li class="li1" :class="{'on':tab===0}" @click="tab=0">全部<span></span></li>
-                        <li class="li2" :class="{'on':tab===1}" @click="tab=1">待支付<span></span></li>
-                        <li class="li3" :class="{'on':tab===2}" @click="tab=2">已支付<span></span></li>
-                    </ul>
-                </div>
+              </div>
+
+              <div class="orderNav">
+                  <ul class="clearfix">
+                      <li class="li1" :class="{'on':tab===0}" @click="allFun()">全部<span></span></li>
+                      <li class="li2" :class="{'on':tab===1}" @click="noFun()">待支付<span></span></li>
+                      <li class="li3" :class="{'on':tab===2}" @click="yesFun()">已支付<span></span></li>
+                  </ul>
+              </div>
             </div>
 
             <!-- 全部 -->
-            <div class="whole" v-show="tab===0">
-                <div class="orderMain">
+            <div class="whole">
+                <div class="orderMain" v-for="item in msg">
                     <ul>
-                        <li class="li1">优铺会员</li>
+                        <li class="li1" v-if="item.orderType==='优铺会员'">优铺会员</li>
+                        <li class="li1" v-else>VIP服务</li>
                         <li class="li2">
-                            <!-- <div>
-                                <router-link :to="{
-                                    path: 'payment',
-                                    params: {
-                                        name: 'name',
-                                        dataObj: data
-                                    },
-                                    query: {
-                                        name: 'name',
-                                        dataObj: data
-                                    }
-                                }">
-                                去支付
-                                </router-link>
-                            </div> -->
-
-                            <div>
-                                <router-link to='/payment'>
+                            <div v-if="item.status==='待支付'">
+                                <router-link :to='{path:"/payment",query:{order:item.orderNo,price:item.fee}}'>
                                 去支付
                                 </router-link>
                             </div>
+                            <div class="yishixiao" v-if="item.status==='已支付'">已支付</div>
+                            <div class="yishixiao" v-if="item.status==='已失效'">已失效</div>
+                        </li>
+                    </ul>
+                    <dl class="orderMainDl clearfix" v-if="order===1">
+                        <dt>
+                            <img src="../../../static/images/mine/VIP.png">
+                        </dt>
+                        <dd>
+                            <p class="p1">购买产品：<span>{{item.productName}}</span></p>
+                            <p>消费金额：<span>{{item.fee}}元</span></p>
+                            <p>创建时间：<span>{{item.createTime}}</span></p>
+                            <p v-if="item.feeTime">付款时间：<span>{{item.feeTime}}</span></p>
+                            <p>订单编号：<span>{{item.orderNo}}</span></p>
+                        </dd>
+                    </dl>
 
-
-                            <!-- <span>已支付</span>
-                            <span>已失效</span> -->
-                        </li>
-                    </ul>
-                    <dl class="orderMainDl">
-                        <dt>
-                            <img src="../../../static/images/mine/VIP.png">
-                        </dt>
-                        <dd>
-                            <p class="p1">购买产品：<span>1个月会员</span></p>
-                            <p>消费金额：<span>300元</span></p>
-                            <p>创建时间：<span>2018-02-02 11:48:42</span></p>
-                            <p>购买产品：<span>1个月会员</span></p>
-                        </dd>
-                    </dl>
-                </div>
-                <div class="orderMain">
-                    <ul>
-                        <li class="li1">优铺会员</li>
-                        <li class="li2">
-                            <h4>已失效</h4>
-                        </li>
-                    </ul>
-                    <dl class="orderMainDl">
-                        <dt>
-                            <img src="../../../static/images/mine/VIP.png">
-                        </dt>
-                        <dd>
-                            <p>购买产品：<span>1个月会员</span></p>
-                            <p>消费金额：<span>300元</span></p>
-                            <p>创建时间：<span>2018-02-02 11:48:42</span></p>
-                            <p>购买产品：<span>1个月会员</span></p>
-                        </dd>
-                    </dl>
-                </div>
-                <div class="orderMain">
-                    <ul>
-                        <li class="li1">VIP服务</li>
-                        <li class="li2">
-                            <h4>已支付</h4>
-                        </li>
-                    </ul>
-                    <dl class="orderMainDl">
-                        <dt>
-                            <img src="../../../static/images/mine/VIP.png">
-                        </dt>
-                        <dd>
-                            <p>购买产品：<span>1个月会员</span></p>
-                            <p>消费金额：<span>300元</span></p>
-                            <p>创建时间：<span>2018-02-02 11:48:42</span></p>
-                            <p>购买产品：<span>1个月会员</span></p>
-                        </dd>
-                    </dl>
                 </div>
             </div>
 
-            <!-- 未完成 -->
-            <div class="incomplete" v-show="tab===1">
-                <div class="orderMain">
-                    <ul>
-                        <li class="li1">优铺会员</li>
-                        <li class="li2">
-                            <div>去支付</div>
-                        </li>
-                    </ul>
-                    <dl class="orderMainDl">
-                        <dt>
-                            <img src="../../../static/images/mine/VIP.png">
-                        </dt>
-                        <dd>
-                            <p>购买产品：<span>1个月会员</span></p>
-                            <p>消费金额：<span>300元</span></p>
-                            <p>创建时间：<span>2018-02-02 11:48:42</span></p>
-                            <p>购买产品：<span>1个月会员</span></p>
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-
-            <!-- 已完成 -->
-            <div class="completed" v-show="tab===2">
-                <div class="orderMain">
-                    <ul>
-                        <li class="li1">VIP服务</li>
-                        <li class="li2">
-                            <h4>已支付</h4>
-                        </li>
-                    </ul>
-                    <dl class="orderMainDl">
-                        <dt>
-                            <img src="../../../static/images/mine/VIP.png">
-                        </dt>
-                        <dd>
-                            <p>购买产品：<span>1个月会员</span></p>
-                            <p>消费金额：<span>300元</span></p>
-                            <p>创建时间：<span>2018-02-02 11:48:42</span></p>
-                            <p>购买产品：<span>1个月会员</span></p>
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-
-        <!-- 暂无订单 -->
-        <div class="noOrder">
-            <div class="noOrderTop">
-                <i>
-                    <router-link to='/mine'>
-                        <img src="../../../static/images/mine/back.png">
-                    </router-link>
-                </i>
-                <h3>我的订单</h3>
-            </div>
-            <dl>
+            <!-- 暂无订单 -->
+            <div class="noOrder" v-if="order===0">
+              <dl>
                 <dt>
-                    <img src="../../../static/images/mine/noOrders.png">
+                  <img src="../../../static/images/mine/noOrders.png">
                 </dt>
                 <p>暂无订单信息</p>
                 <dd>
-                    <router-link to="/buymember">
-                        <span>立即升级会员</span>
-                    </router-link>
+                  <router-link to="/buymember">
+                    <span>立即升级会员</span>
+                  </router-link>
                 </dd>
-            </dl>
+              </dl>
+            </div>
         </div>
+
+
     </div>
 </template>
 
@@ -181,22 +79,80 @@ export default {
     name: 'order',
     data () {
         return {
-            tab:0
+            tab: 0,
+            msg: "",//订单详情
+            order: "",//有没有订单
         }
     },
     computed:{
 
     },
     methods:{
+      init(data){
+        var that = this;
+        this.$http(this.changeData() + "/order/getMyOrders",{
+          method: 'post',
+          params: data
+        }).then(res => {
+          console.log(res)
+          try{
+            this.msg = res.data.data;
+            if(this.msg.length == 0){
+              this.order = 0;
+            }else{
+              this.order = 1;
+            }
+            this.msg.forEach(function (item,index) {
+              item.createTime = getMyDate(item.createTime);
+              if(item.feeTime != ""){
+                item.feeTime = getMyDate(item.feeTime);
+              }
+            })
+          }catch(e){
+            console.log(e)
+          }
 
+        }).catch(err => {
+          console.log(err)
+        });
+      },
+      allFun(){
+        this.tab=0;
+        var data = {
+          account: localStorage.iphone,
+          status: "",
+          token: localStorage.token
+        }
+        this.init(data);
+      },
+      noFun(){
+        this.tab=1;
+        var data = {
+          account: localStorage.iphone,
+          status: 0,
+          token: localStorage.token
+        }
+        this.init(data);
+      },
+      yesFun(){
+        this.tab=2;
+        var data = {
+          account: localStorage.iphone,
+          status: 1,
+          token: localStorage.token
+        }
+        this.init(data);
+      }
     },
-    created() {
-
+    mounted() {
+      var that = this;
+      this.allFun();
     }
+
 
 }
 </script>
-<style scoped lang="scss">
+<style scoped lang="scss"  type="text/scss">
 
 body{
     width: 7.5rem;
@@ -213,7 +169,6 @@ body{
     text-align: center;
     background: #fff;
     border-bottom: 0.02rem solid #eee;
-    position: relative;
 }
 .orderTop h3{
     width: 75%;
@@ -240,6 +195,7 @@ body{
 }
 
 .orderNav{
+  width: 7.5rem;
     height: 1rem;
 }
 .orderNav li{
@@ -267,18 +223,21 @@ body{
     }
 }
 .orderNav .li1{
-    width: 20%;
+    width: 2.5rem;
     line-height: 1rem;
 }
 .orderNav .li2{
-    width: 60%;
-    line-height: 1rem;
-}
-.orderNav .li3{
-    width: 20%;
+  width: 2.5rem;
     line-height: 1rem;
 }
 
+.orderNav .li3{
+  width: 2.5rem;
+    line-height: 1rem;
+}
+.whole{
+  margin-top: 2.3rem;
+}
 .orderMain{
     width: 94%;
     margin-top: 0.3rem;
@@ -317,19 +276,25 @@ body{
         color: #64aaff;
     }
 }
+.orderMain .li2>div.yishixiao{
+  border: none!important;
+  color: #ccc;
+}
 .orderMain .li2>h4{
     line-height: 0.98rem;
     margin-right: 0.2rem;
     color: #ccc;
 }
 .orderMainDl{
-    height: 2.2rem;
+    /*height: 2.2rem;*/
+  padding-bottom: .3rem;
 }
 .orderMainDl dt{
     width: 1.2rem;
-    height: 2.2rem;
+    /*height: 2.2rem;*/
     margin-top: 0.3rem;
     margin-left: 0.2rem;
+
     float: left;
 }
 .orderMainDl dt>img{

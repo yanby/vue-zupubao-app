@@ -11,12 +11,12 @@
               <div class="check" @click.stop="xuan($event,item.shopCollId)"></div>
             </div>
             <div class="img">
-              <img :src="item.img" alt="">
+              <img :src="item.img" alt="" :onerror="defaultImg">
             </div>
             <div class="msg">
               <h4>{{item.title}}</h4>
               <p>{{item.shopName}}</p>
-              <div class="tags" v-if="item.shopTags"><span v-for="(item1,index1) in item.shopTags">{{item1}}</span></div>
+              <div class="tags" v-if="item.shopTags"><span v-if="index1 < 3" v-for="(item1,index1) in item.shopTags">{{item1}}</span></div>
               <div class="price">{{item.monthlyRent}}<span>{{item.unit}}</span></div>
             </div>
           </div>
@@ -54,7 +54,8 @@
         select: 0,
         shopMsg: "",
         ids: "",
-        arr: []
+        arr: [],
+        defaultImg: 'this.src="' + require('../../../static/images/lookShop/err.png') + '"'
       }
     },
     mounted(){
@@ -101,11 +102,13 @@
         this.yes = 2;
         this.select = 1;
         this.tab = 1;
+        $(".price").css({"right":".5rem"})
       },
       complete(){
         this.yes = 1;
         this.select = 0;
         this.tab = 0;
+        $(".price").css({"right":"0rem"})
       },
       remove(){
         var that = this;

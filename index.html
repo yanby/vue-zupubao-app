@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
     <title>租铺宝@优铺</title>
     <link rel="stylesheet" href="./static/css/base.css">
     <link rel="stylesheet" href="./static/css/swiper.css">
@@ -12,11 +12,16 @@
     <script src="./static/js/common.js"></script>
     <script src="./static/js/layer_mobile/layer.js"></script>
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=OxAEbfrVXXqWUSC4nP8mYi3bTKRBcP6u"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script src="http://pv.sohu.com/cityjson?ie=utf-8"></script>
   </head>
   <body>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <script src="https://s22.cnzz.com/z_stat.php?id=1273670427&web_id=1273670427" language="JavaScript"></script>
+    <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1273670427'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s22.cnzz.com/z_stat.php%3Fid%3D1273670427' type='text/javascript'%3E%3C/script%3E"));</script>
     <script>
+
       var _hmt = _hmt || [];
       (function() {
         var hm = document.createElement("script");
@@ -24,6 +29,47 @@
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(hm, s);
       })();
+      //检测是什么设配打开
+      function IsPC() {
+        var userAgentInfo = navigator.userAgent;
+        var Agents = ["Android", "iPhone",
+          "SymbianOS", "Windows Phone",
+          "iPad", "iPod"
+        ];
+        var flag = true;
+        for (var v = 0; v < Agents.length; v++) {
+          if (userAgentInfo.indexOf(Agents[v]) > 0) {
+            flag = false;
+            break;
+          }
+        }
+        return flag;
+      };
+      if (IsPC()) {
+
+          var filename = window.location.href;
+
+          if(filename == "http://m.youpuchina.com/home"){ //首页
+              window.location.href = 'http://www.youpuchina.com';
+          } else if(filename == "http://m.youpuchina.com/seekShop"){ //委托找铺
+              window.location.href = 'http://www.youpuchina.com/seekShop.html';
+          } else if(filename == "http://m.youpuchina.com/turnShop"){ //委托转铺
+              window.location.href = 'http://www.youpuchina.com/turnShop.html';
+          } else if(filename == "http://m.youpuchina.com/lookShop"){ //查看商铺
+              window.location.href = 'http://www.youpuchina.com/shopList.html';
+          } else if(filename == "http://m.youpuchina.com/mine"){ // 我的
+              window.location.href = 'http://www.youpuchina.com/mine.html';
+          } else if(filename == "http://www.youpuchina.com/aboutUP"){ // 关于优铺
+              window.location.href = 'http://www.youpuchina.com/aboutUp.html';
+          } else if(filename == "http://m.youpuchina.com/collect"){ // 会员页
+              window.location.href = 'http://www.youpuchina.com/mine.html';
+          }
+      };
+
+      // if (window.console) {
+      //     console.log("%c ", "background: url(https://up-img.oss-cn-beijing.aliyuncs.com/logo/log.gif) no-repeat center;padding-left:600px;padding-bottom: 200px;");
+      // };
+
     </script>
   </body>
 </html>

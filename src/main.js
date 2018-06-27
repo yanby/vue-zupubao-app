@@ -10,8 +10,9 @@ import store from './store/index.js'
 import host from '../static/js/host/host.js'
 import 'mint-ui/lib/style.css'
 
-Vue.use(Mint)
-Vue.use(host)
+
+Vue.use(Mint);
+Vue.use(host);
 Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
@@ -33,25 +34,25 @@ Vue.config.productionTip = false;
 //   });
 
 // http response 拦截器
-axios.interceptors.response.use(
-  response => {
-    if(response.data.code == "401"){
-      // layer.open({
-      //   content: '登陆超时，请重新登录！'
-      //   ,skin: 'msg'
-      //   ,time: 2 //2秒后自动关闭
-      // });
-      localStorage.clear();
-      // router.replace({
-      //   path: 'login',
-      //   query: {redirect: router.currentRoute.fullPath}
-      // })
-    }
-    return response;
-  },
-  error => {
-    return Promise.reject(error)   // 返回接口返回的错误信息
-  });
+// axios.interceptors.response.use(
+//   response => {
+//     if(response.data.code == "401"){
+//       layer.open({
+//         content: '登陆超时，请重新登录！'
+//         ,skin: 'msg'
+//         ,time: 2 //2秒后自动关闭
+//       });
+//       localStorage.clear();
+//       router.replace({
+//         path: 'login',
+//         query: {redirect: router.currentRoute.fullPath}
+//       })
+//     }
+//     return response;
+//   },
+//   error => {
+//     return Promise.reject(error)   // 返回接口返回的错误信息
+//   });
 
 
 /* eslint-disable no-new */

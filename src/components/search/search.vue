@@ -1,11 +1,15 @@
+<script src="../../../../vue-app/node_modules/nuxt/lib/core/module.js"></script>
 <template>
   <div class="search">
 
           <div class="title">
               <div class="sou">
                   <span></span>
-                  <input type="type" placeholder="区域、面积、租金、商铺编号" @focus="shiqu()" v-model="sousuo" @keydown.13="bianhua()">
+                <form action="" class="">
+                  <!--<input class="keyword" placeholder="区域、面积、租金、商铺编号" @focus="shiqu()" v-model="sousuo" @keydown.13="bianhua()">-->
+                  <input class="keyword" placeholder="区域/商圈/业态/商铺编号" @focus="shiqu()" v-model="sousuo">
                   <b @click="sou()" v-show="close"></b>
+                </form>
               </div>
               <div class="cancle">
                 <span @click="back()">取消</span>
@@ -40,27 +44,22 @@ export default {
       }
     },
     mounted(){
-      // try{
-      //   if(localStorage.history){
-      //     this.list = localStorage.getItem("history");
-      //     this.arr = JSON.parse(this.list);
-      //   }else{
-      //     localStorage.setItem("history","")
-      //   }
-      // }catch(e){
-      //   console.log(e)
-      // }
+      var that = this;
+      $(".keyword").on('keypress',function(e) {
+        var keycode = e.keyCode;
+        if(keycode=='13') {
+          e.preventDefault();
+          //请求搜索接口
+          that.bianhua()
+        }
+      })
     },
     computed:{
 
     },
     methods:{
       shiqu(){
-        // if(localStorage.history){
-        //   this.result = 1;
-        // }else{
-        //   this.result = "";
-        // }
+        this.close = true;
       },
       back(){
         this.$router.go(-1)
@@ -84,22 +83,18 @@ export default {
         this.close = false;
       },
       bianhua(){
-        //this.list.push(this.sousuo);
-        // console.log(this.list)
-        // this.result = 1;
-        // localStorage.setItem("history",JSON.stringify(this.list));
-        // this.arr = JSON.parse(localStorage.getItem("history"));
         var reg = /^\s*$/g;
         var data = {
           search: this.sousuo
         }
         if(reg.test(this.sousuo) == false){
+
           this.$http.post(this.changeData() + "/shop/getSearch",qs.stringify(data)).then(function(res){
             console.log(res)
             this.shopMsg = res.data.content;
             if(this.shopMsg.length == 0){
-              this.result = 2;
-            }else{
+                this.result = 2;
+              }else{
               this.$router.push({path:"/lookShop",query:{search:this.sousuo}})
             }
           }.bind(this)).catch(function(err){
@@ -170,7 +165,7 @@ export default {
             -webkit-tap-highlight-color: rgba(0,0,0,0);
             width: 5.8rem;
             height: 0.57rem;
-            line-height: .62rem;
+            line-height: .57rem;
             border-radius: 0.1rem;
             background: #f0f1f3;
             padding-left: .5rem;

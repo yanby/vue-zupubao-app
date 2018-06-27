@@ -1,7 +1,7 @@
 <template>
     <div class="payment">
-        <div class="paymentTop" @click="quitPayment()">
-            <i>
+        <div class="paymentTop">
+            <i @click="quitPayment()">
                 <!-- <router-link to='/mine'> -->
                     <img src="../../../static/images/mine/back.png">
                 <!-- </router-link> -->
@@ -9,7 +9,7 @@
             <h3>选择支付方式</h3>
         </div>
         <div class="paymentMain">
-            <p>您需要支付<span>399.00</span>元</p>
+            <p>您需要支付<span>{{price}}</span>元</p>
             <dl>
                 <dt>
                     <img src="../../../static/images/mine/wechat.png">
@@ -31,26 +31,101 @@
                 </i>
             </dl>
         </div>
-        <div class="pay" @click="go()">立即支付<span>399.00</span>元</div>
+        <div class="pay" @click="go()">立即支付<span>{{price}}</span>元</div>
         <!-- <mt-button type="primary">primary</mt-button> -->
+
+      <div class="zhifubao"></div>
     </div>
 </template>
 
 <script>
+  import qs from "qs";
 export default {
     name: 'collect',
     data () {
         return {
-            tab: 0
-
+            tab: 0,
+            id: "",
+            order: "",
+            price: "",
+            ip:"",
+            code: "",
+            appId: "",
+            timestamp : "",
+            nonceStr : "",
+            signature: "",
+            package: "",
+            signType: "",
+            paySign: ""
         }
     },
-    computed:{
-
+    mounted(){
+      this.id = this.$route.query.id;
+      this.order = this.$route.query.order;
+      this.price =  this.$route.query.price;
+      this.ip = returnCitySN["cip"];
+      //如果是微信浏览器，获取code
+      if(isWeiXin()){
+        this.init()
+      }
     },
     methods:{
       go(){
-        this.$router.push({path: "/goodmember"})
+        var that = this;
+        var data = {
+          token: localStorage.token,
+          account : localStorage.iphone,
+          productId: this.id,
+          orderNo: this.order,
+          ip: this.ip
+        }
+        if(this.tab == 0){
+          //判断是不是微信浏览器
+          if(isWeiXin()){
+            this.payFun();
+          }else{
+            this.$http(this.changeData() + "/m/WXPayApi/getWXOrder",{
+              method: 'post',
+              params: data
+            }).then(res => {
+              console.log(res)
+              if(res.data.code == "401"){
+                localStorage.clear();
+                layer.open({
+                  content: '请先登录'
+                  ,skin: 'msg'
+                  ,time: 2 //2秒后自动关闭
+                });
+                that.$router.push({path:"/login"})
+              }else{
+                window.location.href = res.data.data;
+              }
+            }).catch(err => {
+              console.log(err)
+            });
+          }
+        }else if(this.tab == 1){
+
+            this.$http(this.changeData() + "/m/aliPayApi/getAliOrder",{
+              method: 'post',
+              params: data
+            }).then(res => {
+              console.log(res)
+              if(res.data.code == "401"){
+                localStorage.clear();
+                layer.open({
+                  content: '请先登录'
+                  ,skin: 'msg'
+                  ,time: 2 //2秒后自动关闭
+                });
+                that.$router.push({path:"/login"})
+              }else{
+                $(".zhifubao").html(res.data)
+              }
+            }).catch(err => {
+              console.log(err)
+            });
+        }
       },
       quitPayment() {
             let _this = this;
@@ -62,15 +137,85 @@ export default {
                 },
                 no: function(index){
                     // alert(1);
-                    layer.close(index);
-                    _this.$router.go(-1)
+                    if(_this.id){
+                      _this.$router.push({path:"/buymember",query:{mine:1}})
+                    }else{
+                      _this.$router.push({path:"/order"})
+                    }
+
                 },
                 skin: 'zhifu'
             })
+        },
+      init(){
+        // var appId = 'wx424b6c66d2b53250';
+        var appId = 'wx06e4787ad5a187a7';
+        var oauth_url = encodeURIComponent(window.location.href.split('#')[0]);
+        var url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + appId + "&redirect_uri=" + oauth_url + "&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect"
+        this.code = getQueryString("code");
+        if (!this.code) {
+          window.location = url;
         }
-    },
-    created() {
+      },
+      payFun(){
+        var that = this;
+        var data = {
+          // url : window.location.href.split('#')[0],
+          token: localStorage.token,
+          account : localStorage.iphone,
+          productId: this.id,
+          orderNo: this.order,
+          code: this.code
+        }
 
+          this.$http.post(this.changeData() + '/wx/WXPayApi/getWXOrder',qs.stringify(data)).then(function(res){
+            console.log(res)
+            if(res.data.code == "401"){
+              localStorage.clear();
+              layer.open({
+                content: '请先登录'
+                ,skin: 'msg'
+                ,time: 2 //2秒后自动关闭
+              });
+              that.$router.push({path:"/login"})
+            }else{
+              function onBridgeReady(){
+                WeixinJSBridge.invoke(
+                  'getBrandWCPayRequest', {
+                    "appId":res.data.data.appId,     //公众号名称，由商户传入
+                    "timeStamp":res.data.data.timeStamp,  //时间戳，自1970年以来的秒数
+                    "nonceStr":res.data.data.nonceStr, //随机串
+                    "package":res.data.data.package, //统一订单号
+                    "signType":res.data.data.signType,         //微信签名方式：
+                    "paySign":res.data.data.paySign //微信签名
+                  },
+                  function(res1){
+                    WeixinJSBridge.log(res1.err_msg)
+                    // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证 它绝对可靠。
+                    if(res1.err_msg == "get_brand_wcpay_request:ok" ) {
+                      that.$router.push({path:"/goodmember"})
+                    } else{
+                      history.back();
+                    }
+                  }
+                );
+              }
+              if (typeof WeixinJSBridge == "undefined"){
+                if( document.addEventListener ){
+                  document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+                }else if (document.attachEvent){
+                  document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                  document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+                }
+              }else{
+                onBridgeReady();
+              }
+            }
+          }.bind(this)).catch(function(err){
+            console.log("商店详情页面错误：",err)
+          });
+
+      },
     }
 
 }
@@ -151,13 +296,12 @@ export default {
             float: left;
         }
         i{
-          -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
             line-height: 1.2rem;
             display: inline-block;
             float: right;
             margin-right: .2rem;
             span{
-
                 display: inline-block;
                 width: .5rem;
                 height: .5rem;
@@ -208,16 +352,21 @@ export default {
   }
   .layui-m-layer-zhifu p{
     font-size: .32rem;
+    line-height: .5rem;
     color: #333;
   }
   .layui-m-layer-zhifu p span{
     color: #76aaf8;
+  }
+  .layui-m-layer-zhifu .layui-m-layerbtn{
+    border-top: 0.01rem solid #D0D0D0;
   }
   .layui-m-layer-zhifu .layui-m-layerbtn span:nth-of-type(1){
     color: #898989;
     background: #f7f8fa;
     font-size: .34rem;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
+    border-right: 0.01rem solid #D0D0D0;
   }
   .layui-m-layer-zhifu .layui-m-layerbtn span:nth-of-type(2){
     color: #fff;
@@ -227,24 +376,5 @@ export default {
     -webkit-tap-highlight-color: rgba(0,0,0,0);
   }
 </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -2,12 +2,10 @@
     <div class="login">
         <div class="loginMain">
             <div class="nav clearfix">
-                <router-link to='/mine'>
-                    <img class="navBack pull-left" src="../../../static/images/login/backWhite.png" alt="">
-                </router-link>
+                <img class="navBack pull-left" src="../../../static/images/common/back-write.png" alt="" @click="navBack()">
                 <h2 class="navTitle pull-left">登录／注册</h2>
             </div>
-            <img class="logo" src="../../../static/images/login/logo.png" alt="">
+            <div class="logo"></div>
             <div class="dInput clearfix">
                 <img class="pull-left" src="../../../static/images/login/input1.png" alt="">
                 <div class="input1 pull-left">
@@ -18,7 +16,7 @@
                 <img class="pull-left" src="../../../static/images/login/input2.png" alt="">
                 <div class="input2 pull-left">
                     <input type="tel" v-model="securityCode" placeholder="请输入验证码" maxlength="6">
-                    <button type="button" :disabled="disabled" @click="sendcode" class="btns">{{btntxt}}</button>
+                    <button type="button" :disabled="disabled" @click="sendcode" class="btns" :class="{'codeColor':chengaColor}">{{btntxt}}</button>
                 </div>
             </div>
             <div class="btn">
@@ -42,6 +40,7 @@ export default {
             disabled:false,
             time:0,
             btntxt:"获取验证码",
+            chengaColor: false,
             formMess:{
                 email:this.email,
                 phone:this.phone
@@ -70,50 +69,28 @@ export default {
 
         //获取验证码
         sendcode() {
-            let reg=/^1([38]\d|4[57]|5[0-35-9]|7[06-8])(\-\d{4}){2}$/;
-            let _this = this;
-            if(this.phoneVal==''){
-               layer.open({
-                    content: '请输入手机号码',
-                    skin: 'msg',
-                    time: 2
-                });
-            }else if(!reg.test(this.phoneVal)){
-                layer.open({
-                    content: '手机格式不正确',
-                    skin: 'msg',
-                    time: 2
-                });
-            }else{
+            if(this.chengaColor == true){
                 this.time=60;
                 this.disabled=true;
                 this.timer();
 
                 // 接口调用
                 let _this = this
-                // let url = 'http://192.168.1.182:8080/user/sendsms?phoneNumber=13240967310'
-                // let url = 'api/user/sendsms'
                 let url =  _this.changeData() + '/user/sendsms'
-
-
                 let str = _this.phoneVal;
 
                 let num = str.replace(/[^0-9]/ig,"");
-
-                // console.log(num);
                 axios(url,{
                     method: 'post',
-
                     params: {
                         phoneNumber: num
                     }
-
                 }).then(data => {
-                    console.log(data);
+                    // console.log(data);
                 }).catch(err => {
                     console.log(err)
                 });
-           }
+            }
         },
         // 倒计时
         timer() {
@@ -131,18 +108,17 @@ export default {
 
         // 点击登录按钮
         loginBtn() {
-
             let reg=/^1([38]\d|4[57]|5[0-35-9]|7[06-8])(\-\d{4}){2}$/;
             let _this = this;
             if(this.phoneVal==''){
                layer.open({
-                    content: '请输入手机号码',
+                    content: '请输入手机号',
                     skin: 'msg',
                     time: 2
                 });
             }else if(!reg.test(this.phoneVal)){
                 layer.open({
-                    content: '手机格式不正确',
+                    content: '请输入正确的手机号',
                     skin: 'msg',
                     time: 2
                 });
@@ -152,39 +128,21 @@ export default {
                     skin: 'msg',
                     time: 2
                 });
-
             }else{
-
                 let url = this.changeData() + '/login'
-                // let url =  'http://192.168.1.55:8080/login';
-
-
                 let str = _this.phoneVal;
                 let num = str.replace(/[^0-9]/ig,"");
-
-                // let params1 = {
-                //     account: num,
-                //     password: _this.securityCode,
-                // }
-
-                // let obj = qs.stringify(params1);
-                // console.log(obj)
                 axios(url,{
                     method: 'post',
                     params:
                     {
                         account: num,
                         password: _this.securityCode,
+                        channel: 2
                     }
-
                 }).then(data => {
-                    // this.tableDataAll = data.data.content
                     console.log(data);
-
-
                     let tel = data.data.phone
-
-
                     if(data.data.code == 200){
                         layer.open({
                             content: '登录成功',
@@ -192,46 +150,61 @@ export default {
                             time: 2
                         });
 
-                        // console.log(data.data.phone);
-
-                        // window.sessionStorage.setItem("iphone",tel);
                         window.localStorage.setItem("iphone",tel);
                         window.localStorage.setItem("token",data.data.token);
                         window.localStorage.setItem("pvCount",data.data.pvCount);
+                        window.localStorage.setItem("memberType",data.data.memberType);
 
                         _this.$store.commit("login",data.data.token);
-                        _this.$router.go(-1)
-                    }else{
+                        _this.$router.go(-1);
+                    }else if(data.data.code == 500){
+                      layer.open({
+                        content: '请输入正确验证码',
+                        skin: 'msg',
+                        time: 2
+                      });
+                    } else{
                         layer.open({
                             content: '登录失败',
                             skin: 'msg',
                             time: 2
                         });
                     }
-                    if(data.data.code == 500){
-                        layer.open({
-                            content: '验证码错误',
-                            skin: 'msg',
-                            time: 2
-                        });
-                    }
-
                 }).catch(err => {
                     console.log(err)
                 });
             }
-
-
         },
+        navBack(){
+            this.$router.go(-1)
+        },
+
+
     },
     created() {
 
 
-
-
-
     },
     watch: {
+        phoneVal(){
+
+            if(this.phoneVal.length == 13){
+                this.chengaColor = true;
+
+            }else{
+                this.chengaColor = false;
+
+            }
+            let reg = /^1([38]\d|4[57]|5[0-35-9]|7[01-8])(\-\d{4}){2}$/;
+
+            if(!reg.test(this.phoneVal)){
+                this.chengaColor = false;
+            }else{
+                this.chengaColor = true;
+
+            }
+
+        }
 
     }
 }
@@ -272,25 +245,30 @@ export default {
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 .navBack{
-    width: 0.14rem;
-    height: 0.26rem;
+    width: 0.36rem;
+    height: 0.32rem;
     margin-top: 0.3rem;
     margin-left: .1rem;
     /*background: pink;*/
+    float: left;
 }
 .navTitle{
     height: 1rem;
-    width: 6.8rem;
+    width: 6.2rem;
     line-height: 1rem;
     font-size: 0.38rem;
     color: #fff;
     text-align: center;
+    float: left;
 }
-.logo{
+/*.logo{
     display: block;
-    width: 2.48rem;
-    height: 2.48rem;
+    width: 2.06rem;
+    height: 2.06rem;
     margin:0.8rem auto;
+}*/
+.logo{
+    height: 1rem;
 }
 .dInput{
     width: 6.9rem;
@@ -339,26 +317,23 @@ input:-ms-input-placeholder{  /* Internet Explorer 10-11 */
     font-size: 0.28rem;
     color: #fff;
 }
-/*.dInput .input2 a{
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-    width: 1.4rem;
-    font-size: 0.28rem;
-    color: #3a8ff3;
-    line-height: 0.68rem;
-}*/
 .btns{
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     width: 1.7rem;
     font-size: 0.28rem;
-    color: #3a8ff3;
+    /*color: #3a8ff3;*/
+    color: #ccc;
     line-height: 0.68rem;
     background: rgba(0,0,0,0);
     text-align: right;
 }
+.codeColor{
+    color: #3a8ff3;
+}
 .btn{
     margin-top: 2rem;
     text-align: center;
-    padding-bottom: 2.5rem;
+    padding-bottom: 5rem;
 }
 .btn p{
     font-size: 0.26rem;

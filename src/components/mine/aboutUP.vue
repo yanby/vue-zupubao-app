@@ -18,7 +18,6 @@
                             <h2>优铺介绍</h2>
                             <i></i>
                             <p>Company Profile</p>
-                            <!-- <img src="../../../static/images/aboutUP/pmgressbar.png" class="pmgressbar"> -->
                         </div>
                     </dt>
                     <div class="titleNav">
@@ -33,8 +32,8 @@
                     </div>
                     <dd>
                         <p>优铺深耕垂直细分市场，借助互联网和资本力量。</p>
-                        <p>A、"租铺宝"聚焦一线城市商铺租赁业务，面对增量市场，服务于商家；</p>
-                        <p>B、"卖铺宝"面对增量市场，利用经纪人众包，为开发商服务，招商和销售；</p>
+                        <p>A、"租铺宝"聚焦一线城市商铺租赁业务，面对存量(二手商铺)市场，服务于商家；</p>
+                        <p>B、"卖铺宝"面对增量(新项目商铺)市场，利用经纪人众包，为开发商服务，招商和销售；</p>
                         <p>C、优铺计划在三四线城市寻找合伙人加盟，技术输出、平台赋能、创新驱动，目标是形成覆盖全国的商铺租售系统；</p>
                     </dd>
 
@@ -50,7 +49,7 @@
                         <img src="../../../static/images/aboutUP/newAboutUP/04@2x.png">
                     </div>
                     <dd>
-                        <p>在一线城市，一铺难求。2018年，随着北上深房地产市场从增量转向存量，2018年4月推出“租铺宝”APP，商铺覆盖全市， 直接对接房东，让转店租店不再难。</p>
+                        <p>在一线城市，一铺难求。2018年，随着北上深房地产市场从增量(新项目商铺)转向存量(二手商铺)，2018年4月推出“租铺宝”APP，商铺覆盖全市， 直接对接房东，让转店租店不再难。</p>
                     </dd>
 
                     <div class="titleNav">
@@ -73,12 +72,18 @@
                 <dl>
                     <dt>
                         <img src="../../../static/images/aboutUP/newAboutUP/chen.png">
-                        <p>优铺董事长 陈云峰</p>
+                        <p>陈云峰</p>
                     </dt>
                     <dd>
-                        <p>优铺创始人，2008年创立中经联盟，任秘书长，担任中房经联商业地产专委会主席、北京支持雄安产业发展促进会副会长、天津工商联房地产商会商业地产专委会执行主任、河北房协商业地产专委会主任，上海市长宁区13届政协委员。</p>
-                        <p>曾经担任国美电器总部营销总经理,历任鹏润地产营销总监、项目总经理、集团副总裁,华业地产副总裁，在商业服务业和地产业耕耘多年。</p>
-                        <p>2016年创立优铺网，致力于商铺租售平台打造。北京理工大学客座教授、CCTV、BTV、中央人民广播电台经济之声房地产特约评论员，新浪乐居财经评论员。</p>
+                        <h2>现任优铺网 创始人、董事长，中经联盟 创始人、秘书长。</h2>
+                        <h3>职业经历：</h3>
+                        <p>曾经是国美电器的核心人物，担任国美电器北京总部第一任全国营销总监和管理中心总经理；历任天津国美电器第一任总经理、上海国美电器总经理，香港国美电器开业副总指挥，为国美的发展立下汗马功劳。</p>
+                        <p>2005年转战房地产行业，亲历中国房地产飞速发展的18年。曾任北京鹏润地产开发有限公司（明天房地产）营销总监、项目总经理、集团副总裁, 家乐园集团总裁，上市公司华业地产副总裁，负责北京、深圳、长春、大连、武汉、三亚营销与开发工作。</p>
+                        <p>2008年，牵头创立中国房地产业行业最具影响力的主流社团——中经联盟，业内称为中国房地产经理人联盟，担任秘书长。</p>
+                        <p>2016年，开始创业，创立优铺网，担任董事长。</p>
+                        <p>2018年，成立优铺商学院，担任董事长。</p>
+                        <h3>社会职务：</h3>
+                        <p>中经联盟（中国房地产经理人联盟）秘书长，北京促进雄安产业发展促进会副会长，上海长宁区13届政协委员、中房经联商业地产专委会主席、中国房地产业协会商业地产专业委员会 副秘书长、天津工商联房地产商会商业地产专委会执行主任、河北省住宅与房地产协会商业地产专业委员会主任、北京理工大学客座教授、CCTV、BTV、中央人民广播电台特邀评论员、河北工业大学MBA实践指导教授、河北工业大学北京校友会副会长、秘书长。</p>
                     </dd>
                 </dl>
             </div>
@@ -184,9 +189,10 @@
 
                 <dl class="fine_line">
                     <h3>共享平台资源之粉丝社群经济</h3>
-                    <p>优铺APP——商业地产资讯信息交易平台</p>
-                    <p>优铺共享经纪人仅3个月已下载注册<span>200000</span>人。</p>
+                    <p>优铺旗下卖铺宝APP——联动开发商、经纪人及品牌资源，打造专属商业地产的资源整合营运平台</p>
+                    <p>优铺旗下租铺宝APP——服务于商铺店主、开店创业者、品牌商家群体的互联网商铺交易服务平台</p>
                     <img src="../../../static/images/aboutUP/newAboutUP/upCode.png" class="img1">
+                    <img src="../../../static/images/aboutUP/newAboutUP/zupubao.png" class="img_zupubao">
                     <p>优铺公众号（北京优铺、天津优铺、河北优铺）累计网聚优质中国商业地产业内粉丝<span>80000</span>人。</p>
                     <img src="../../../static/images/aboutUP/newAboutUP/upCode2.png" class="img2">
                     <p>中经联盟APP、公众号，中经联盟注册会员<span>3000</span>人。</p>
@@ -225,7 +231,7 @@
                     <!-- <ul> -->
                         <dl>
                             <dt><img src="../../../static/images/aboutUP/newAboutUP/01.png"></dt>
-                            <dd>存量商铺+增量商铺，双轴并行</dd>
+                            <dd>存量(二手商铺)+增量(新项目商铺)，双轴并行</dd>
                         </dl>
                         <dl>
                             <dt><img src="../../../static/images/aboutUP/newAboutUP/02.png"></dt>
@@ -380,7 +386,7 @@ export default {
     width: 7.1rem;
     padding-left:.2rem;
     padding-right: .2rem;
-    margin-top: 1rem;
+    margin-top: 1rem;  
     dt{
         text-align: center;
         img{
@@ -389,13 +395,22 @@ export default {
         }
         p{
             color: #333;
-            font-size: .28rem;
+            font-size: .3rem;
             line-height: 0.5rem;
             font-weight: 500;
         }
     }
     dd{
-        margin-top: .35rem;
+        margin-top: .1rem;
+        h2{
+            margin-bottom: .1rem;
+            font-size: .3rem;
+            color: #888;
+        }
+        h3{
+            font-size: .3rem;
+            color: #333;
+        }
         p{
             /*text-indent: 2em;*/
             font-size: .28rem;
@@ -525,6 +540,12 @@ export default {
             height: 1rem;
             margin: .2rem 0;
         }
+        .img_zupubao{
+            width: 1rem;
+            height: 1rem;
+            /*margin: .2rem 0;*/
+            margin-left: .25rem;
+        }
         .img2{
             height: 1.12rem;
             width: 3.72rem;
@@ -535,7 +556,6 @@ export default {
             width: 2.34rem;
             margin: .2rem 0;
         }
-
         .liImg1{
             width: 28%;
             float: left;
@@ -568,7 +588,6 @@ export default {
         .text2{
             width: 72%;
             float: left;
-
             p{
                 color: #888;
                 font-size: .28rem;
@@ -675,7 +694,6 @@ export default {
         height: .08rem;
         line-height: .6rem;
         margin-top: .01rem;
-        /*margin-bottom: .5rem;*/
     }
 }
 .titleNav{
@@ -687,14 +705,9 @@ export default {
         height: 100%;
     }
 }
-
 li{
     list-style-type: none;
 }
-
-
-
-
 /*清除浮动代码*/
 .clearfloat:after{display:block;clear:both;content:"";visibility:hidden;height:0}
 .clearfloat{zoom:1}

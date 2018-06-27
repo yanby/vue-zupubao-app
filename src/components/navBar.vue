@@ -64,7 +64,7 @@ export default {
     color: #898989;
     /*border-top: 0.008rem solid #d3ddf6;*/
     font-size: 0.2rem;
-  box-shadow:2px 0px 12px rgba(132,166,195,0.14); 
+  box-shadow:2px 0px 12px rgba(132,166,195,0.14);
   z-index: 100;
 }
 .nav-class dl{
