@@ -280,7 +280,34 @@ export default {
     computed:{
 
     },
-    methods:{
+    mounted(){
+        //截取Url里面的参数
+        function GetRequest() {
+            var urlInfo = location.search; //获取url中"?"符后的字串
+            // alert(window.location.host)
+            // alert(urlInfo);
+            var theRequest = new Object();
+            if (urlInfo.indexOf("?") != -1) {
+                var str = urlInfo.substr(1);
+                var strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = decodeURI(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+        //通过url取数
+        var request = new Object();
+        request = GetRequest();
+        var move = request['move'];
+
+        if(move == "android"){
+            $(".aboutUP-top").hide();
+            $(".up-introduce dl").css({"padding-top":".5rem"});
+        }
+
+    },
+    methods: {
 
     },
     created() {

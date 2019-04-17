@@ -13,5 +13,6 @@ exports.install = function (Vue, options) {
 
 	    // return (protocol+'//'+hostname);
       return "http://zaixian.abc.com.cn:8080";
+      
     };
 };

@@ -1,16 +1,73 @@
 <template>
-    <div id="app">
-      <keep-alive>
+<div id="app">
+    <keep-alive>
         <router-view v-if="$route.meta.keepAlive"></router-view>
-      </keep-alive>
-      <router-view v-if="!$route.meta.keepAlive"></router-view>
-      <!--<router-view></router-view>-->
-    </div>
+        <!-- <router-view></router-view> -->
+    </keep-alive>
+    <router-view v-if="!$route.meta.keepAlive"></router-view>
+    <!--<router-view></router-view>-->
+</div>
 </template>
 
 <script>
+import axios from 'axios';
+import qs from 'qs';
 export default {
-  name: 'App'
+    name: 'App',
+    watch:{
+        $route: {
+            handler: function(to, from){
+                if(to.path == "/home"){
+                    window.addEventListener("scroll",this.scroll)
+                }else{
+                    window.removeEventListener("scroll",this.scroll)
+                }
+            },
+            // 深度观察监听
+            deep: true
+        }
+    },
+    mounted(){
+        if(this.$route.path == "/home"){
+            window.addEventListener("scroll",this.scroll)
+        }else{
+            window.removeEventListener("scroll",this.scroll)
+        }
+    },
+    updated(){
+        
+    },
+    created(){
+        var url ="http://" +  window.location.host;
+        axios({
+            url: this.changeData() + '/show/getOpenedCitiesList',
+            method: "post",
+        }).then(res => {
+            // console.log("获取城市");
+            // console.log(res);
+            res.data.data.forEach(function (item,index) {
+                if(item.m_url == url){
+                    sessionStorage.provinceId = item.province_id;
+                    sessionStorage.cityId =  item.city_id;
+                    sessionStorage.cityName = item.city_name;
+                }
+            })
+        }).catch(err => {
+            console.log(err)
+        });
+    },
+    methods:{
+        scroll(){
+            var scrollTop = $(window).scrollTop();
+            var scrollHeight = $(document).height();
+            var windowHeight = $(window).height();
+            if(scrollTop + windowHeight == scrollHeight){
+                this.$router.push({
+                    path: '/lookShop'
+                })
+            }
+        }
+    }
 }
 </script>
 

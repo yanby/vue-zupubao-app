@@ -1,6 +1,5 @@
 <template>
     <div class="mine">
-
         <div class="mineTop">
         	<div class="headImg"><img src="../../../static/images/mine/zupubao.png"></div>
         	<dl>
@@ -17,7 +16,6 @@
                 <div class="lookShop" v-if='num == false'>今日已查看<span>0</span>套铺源（共{{pvCount1}}套／日）</div>
             	<div class="lookShop" v-else>今日已查看<span>{{pvCount1 - numIndex}}</span>套铺源（共{{pvCount1}}套／日）</div>
             </div>
-
         	<dl @click="buymember_box">
                 <dt><img src="../../../static/images/mine/member.png"></dt>
                 <dd>会员服务</dd>
@@ -35,11 +33,23 @@
                     <i class="more"><img src="../../../static/images/mine/more.png"></i>
                 </router-link>
         	</dl>
-            <dl @click="goMessage()">
+            <!-- <dl @click="goMessage()">
                 <dt><img src="../../../static/images/mine/message.png"></dt>
                 <dd v-if="this.isCount == 1">我的消息<img src="../../../static/images/mine/red-ellipse.png" class="red_round"></dd>
                 <dd v-else="isCount">我的消息</dd>
                 <i class="more"><img src="../../../static/images/mine/more.png"></i>
+            </dl> -->
+            <!-- <dl @click="goInvite()">
+                <dt><img src="../../../static/images/mine/invite.png"></dt>
+                <dd>我的邀请</dd>
+                <i class="more"><img src="../../../static/images/mine/more.png"></i>
+            </dl> -->
+            <dl @click="goMyPublish()">
+                <!-- <router-link to='/myPublish'> -->
+                    <dt><img src="../../../static/images/mine/myPublishIcon.png"></dt>
+                    <dd>我的发布</dd>
+                    <i class="more"><img src="../../../static/images/mine/more.png"></i>
+                <!-- </router-link> -->
             </dl>
         	<dl>
                 <router-link to='/aboutUP'>
@@ -51,7 +61,7 @@
         </div>
         <div class="edition">
             <h3>当前版本</h3>
-            <h5>V2.0.0</h5>
+            <h5>V3.6.1</h5>
         </div>
         <div class="quitBtn" v-if="tel" @click="btn()">退出当前帐号</div>
     </div>
@@ -60,8 +70,9 @@
 <script>
 import axios from 'axios';
 import qs from "qs";
+import Bus from '../../../static/js/bus.js'
 export default {
-    name: 'home',
+    name: 'mine',
     data () {
         return {
             tel: '',
@@ -70,7 +81,8 @@ export default {
             num: true,
             numShow: false,
             isVIP:null,
-            isCount: null
+            isCount: null,
+            showRedDot: "1",
         }
     },
     computed:{
@@ -88,6 +100,21 @@ export default {
             this.numShow = false;
             this.num = false;
             this.isCount = null;
+            // 传值给navTab组件
+            Bus.$emit('msg', '传值');
+
+            function clearCookie() {
+                var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
+                if (keys) {
+                  for (var i = keys.length; i--;) {
+                    //正式环境
+                    document.cookie = keys[i] + '=0;path=/;domain=.youpuchina.com;expires=' + new Date(0).toUTCString();//清除一级域名下的或指定的，例如 .kevis.com
+                    //测试环境
+                    // document.cookie = keys[i] + '=0;path=/;domain=.yingshangchina.com;expires=' + new Date(0).toUTCString();//清除一级域名下的或指定的，例如 .kevis.com
+                  }
+                }
+            }
+            clearCookie();
         },
         // 调整
         buymember_box(){
@@ -95,7 +122,7 @@ export default {
                 if(this.isVIP == 0){
                     this.$router.push({path:"/goodmember"});
                 } else {
-                    this.$router.push({path:"/buymember"});
+                    this.$router.push({path:"/buymember",query:{mine:1}});
                 }
             }else{
                 this.$router.push({path:"/login"});
@@ -109,69 +136,95 @@ export default {
                 this.$router.push({path:"/login"});
             }
         },
-        // 跳转我的消息
-        goMessage(){
+        // 跳转我的邀请
+        goInvite(){
             if(localStorage.iphone){
-                this.$router.push({path:"/message"});
+                this.$router.push({path:"/inviteFriends"});
             }else{
                 this.$router.push({path:"/login"});
             }
         },
+        // 跳转我的发布
+        goMyPublish(){
+            if(localStorage.iphone){
+                this.$router.push({path:"/myPublish"});
+            }else{
+                this.$router.push({path:"/login"});
+            }
+        },
+
+        // 跳转我的消息
+        // goMessage(){
+        //     if(localStorage.iphone){
+        //         this.$router.push({path:"/message"});
+        //     }else{
+        //         this.$router.push({path:"/login"});
+        //     }
+        // },
         //
-        isMessage(){
-            let url =  this.changeData() + '/user/getMsgStatus'
-            // let url =  'http://192.168.1.135:8200/user//getMsgStatus'
+        // isMessage(){
+        //     let url =  this.changeData() + '/user/getMsgStatus'
+        //     axios(url,{
+        //         method: 'post',
+        //         params:
+        //         {
+        //             account: localStorage.iphone,
+        //             token: localStorage.token
+        //         },
+        //     }).then(data => {
+        //         console.log(data);
+        //         this.isCount = data.data.count;
+
+        //     }).catch(err => {
+        //         console.log(err)
+        //     });
+        // }
+
+        userData(){
+            let url =  this.changeData() + '/shop/shopCheckedRecords'
             axios(url,{
                 method: 'post',
                 params:
                 {
-                    account: localStorage.iphone,
-                    token: localStorage.token
+                    cityId: sessionStorage.cityId,
+                    shopId: "0",
+                    type: "0",
+                    roof: "0"
                 },
             }).then(data => {
-                console.log(data);
-                console.log(data.data.count);
-                this.isCount = data.data.count;
-
+                // console.log(data);
+                if(data.data.code == 101){
+                    this.numShow = true;
+                    this.numIndex = data.data.count;
+                    // 用户查看次数
+                    this.pvCount1 = data.data.pvCount;
+                    //判断会员角色
+                    this.isVIP = data.data.memberType;
+                    // this.isMessage();
+                }else if(data.data.code == 401){
+                    this.num = false;
+                    this.numShow = false;
+                    localStorage.clear();
+                }
             }).catch(err => {
                 console.log(err)
             });
         }
-
-
+        
     },
     mounted() {
-        let url =  this.changeData() + '/user/shopCheckedRecords'
-        axios(url,{
-            method: 'post',
-            params:
-            {
-                account: localStorage.iphone,
-                shopId: '0',
-                type: "0",
-                token: localStorage.token
-            },
-        }).then(data => {
-            // console.log(data);
-            if(data.data.code == 200){
-                this.numShow = true;
-                this.tel = localStorage.iphone;
-                this.numIndex = data.data.count;
-                // 用户查看次数
-                this.pvCount1 = data.data.pvCount;
-                //判断会员角色
-                this.isVIP = data.data.memberType;
-                this.isMessage();
-            }else if(data.data.code == 401){
-                this.num = false;
-                this.numShow = false;
-                localStorage.clear();
-            }
-        }).catch(err => {
-            console.log(err)
-        });
+        if(localStorage.token){
+            this.userData();
+        }
         // let USERS = window.localStorage.getItem("iphone");
         // let TOKEN = window.localStorage.getItem("token");
+    },
+    updated(){
+      if(localStorage.iphone){
+        this.tel = localStorage.iphone;
+      }else{
+        this.tel = "";
+      }
     }
 }
 </script>
@@ -251,6 +304,7 @@ body{
     height: 0.98rem;
     border-bottom: 0.01rem solid #eaeaea;
     background: #fff;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
     dt{
         width: 18%;
         height: 0.98rem;
@@ -323,6 +377,7 @@ body{
     text-align: center;
     margin-left: 10%;
     margin-top: .58rem;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 </style>

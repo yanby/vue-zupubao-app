@@ -19,6 +19,30 @@
                 </router-link>
             </dl>
 
+            <dl class="dl4">               
+                <router-link to='/publish' active-class="active4">
+                    <dd>
+                        <i class='icon4'></i>
+                    </dd>
+                    <dt>发布</dt>
+                </router-link>             
+            </dl>
+
+            <dl class="dl5">
+                <span @click="infoBtn()">
+                    <!-- <a class="active5">        -->
+                    <router-link to='/message' active-class="active5">
+                        <dd>
+                            <img src="../../static/images/mine/red-ellipse.png" v-if="this.isCount == 1" class="red-ellipse">
+                            <!-- <img src="../../static/images/mine/red-ellipse.png" class="red-ellipse"> -->
+                            <i class='icon5'></i>
+                        </dd>
+                        <dt>消息</dt>
+                    </router-link>
+                    <!-- </a> -->
+                </span>
+            </dl>
+
             <dl class="dl3">
                 <router-link to='/mine' active-class="active3">
                     <dd>
@@ -27,31 +51,66 @@
                     <dt>我的</dt>
                 </router-link>
             </dl>
-
         </div>
         <router-view></router-view>
     </div>
 </template>
-
 <script>
+import axios from 'axios';
+import qs from "qs";
+import Bus from '../../static/js/bus.js'
 export default {
     name: 'navBar',
     data () {
         return {
-
+            isCount: null,
         }
     },
-    methods:{
+    components:{
 
     },
-    created(){
-
+    watch: {
+        
+    },
+    methods:{
+        infoBtn(){
+            if(localStorage.iphone){
+                this.isMessage();
+                this.$router.push({path:"/message"});             
+            }else{
+                this.$router.push({path:"/login",query:{"urlType":"message"}});  
+            }    
+        },
+        isMessage(){
+            let url =  this.changeData() + '/member/auth/getMsgStatus';
+            axios(url,{
+                method: 'post',
+                params:
+                {
+                    cityId: "110100"  //string  是   
+                },
+            }).then(data => {
+                // console.log(data);
+                this.isCount = data.data.count;
+            }).catch(err => {
+                console.log(err)
+            });
+        },
+    },
+    mounted() {
+        let self = this
+        Bus.$on('msg', (e) => {
+            this.isCount = null;
+        })　　　
+    },
+    created(){   
+        this.isMessage();       
     }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
 .nav{
     width: 100%;
 }
@@ -64,15 +123,15 @@ export default {
     color: #898989;
     /*border-top: 0.008rem solid #d3ddf6;*/
     font-size: 0.2rem;
-  box-shadow:2px 0px 12px rgba(132,166,195,0.14);
-  z-index: 100;
+    box-shadow:2px 0px 12px rgba(132,166,195,0.14);
+    z-index: 100;
 }
 .nav-class dl{
     width: 33.33%;
     /*background-color: #fff;*/
     float: left;
     text-align: center;
-  padding-top: .1rem;
+    padding-top: .1rem;
 }
 .nav-class dl a{
   -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -80,14 +139,20 @@ export default {
   width: 100%;
   height: 100%;
 }
-.nav-class .dl1{
-    width: 25%;
+.nav-class dl{
+    width: 20%;
 }
-.nav-class .dl2{
-    width: 50%;
-}
-.nav-class .dl3{
-    width: 25%;
+.dl5{ 
+    dd{
+        position: relative;
+        .red-ellipse{
+            width: .16rem;
+            height: .16rem;
+            position: absolute;
+            top: 0px;
+            right: 30%;
+        }
+    }   
 }
 
 .nav-class dd{
@@ -103,6 +168,13 @@ export default {
     height: 0.5rem;
     width: 0.5rem;
 }
+.nav-class dd>.icon4{
+    display: inline-block;
+    height: 1rem;
+    width: 1rem;
+    position: relative;
+    top: -.5rem;
+}
 .icon1{
     background: url(../../static/images/home/homePage.png) no-repeat;
     background-size: 100% 100%;
@@ -113,6 +185,14 @@ export default {
 }
 .icon3{
     background: url(../../static/images/home/mine.png)no-repeat;
+    background-size: 100% 100%;
+}
+.icon4{
+    background: url(../../static/images/home/publish.png) no-repeat;
+    background-size: 100% 100%;
+}
+.icon5{
+    background: url(../../static/images/home/info.png)no-repeat;
     background-size: 100% 100%;
 }
 
@@ -131,6 +211,25 @@ export default {
     background: url(../../static/images/home/mine2.png)no-repeat;
     background-size: 100% 100%;
 }
+.active4 dt{color: #65a8ff;}
+.active4 .icon4{
+    background: url(../../static/images/home/publish2.png)no-repeat;
+    background-size: 100% 100%;
+}
+.active5 dt{color: #65a8ff;}
+.active5 .icon5{
+    background: url(../../static/images/home/info2.png)no-repeat;
+    background-size: 100% 100%;
+}
+/*.active5:active {
+    dt{
+        color: #65a8ff;
+    }
+    .icon5{
+        background: url(../../static/images/home/info2.png)no-repeat;
+        background-size: 100% 100%;
+    }
+} */
 </style>
 
 

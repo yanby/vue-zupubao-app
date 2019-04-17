@@ -1,32 +1,28 @@
 <script src="../../../../vue-app/node_modules/nuxt/lib/core/module.js"></script>
 <template>
-  <div class="search">
-
-          <div class="title">
-              <div class="sou">
-                  <span></span>
-                <form action="" class="">
-                  <!--<input class="keyword" placeholder="区域、面积、租金、商铺编号" @focus="shiqu()" v-model="sousuo" @keydown.13="bianhua()">-->
-                  <input class="keyword" placeholder="区域/商圈/业态/商铺编号" @focus="shiqu()" v-model="sousuo">
-                  <b @click="sou()" v-show="close"></b>
-                </form>
-              </div>
-              <div class="cancle">
-                <span @click="back()">取消</span>
-              </div>
-          </div>
-          <div class="history" v-if="result===1">
-              <dl>
-                <!--<dt>搜索历史 <span @click="clearAll()"></span></dt>-->
-                <dd v-for="(item,index) in arr">{{item}} <span @click="remove(index)"></span></dd>
-              </dl>
-          </div>
-          <div class="noHistory" v-else-if="result===2">
-              <div class="img"></div>
-              <p>您搜索的内容不存在</p>
-          </div>
-
-  </div>
+<div class="search">
+    <div class="title">
+        <div class="sou">
+            <span></span>
+            <form action="" class="">
+                <input class="keyword" placeholder="区域/商圈/业态/商铺编号" @focus="shiqu()" v-model="sousuo">
+                <b @click="sou()" v-show="close"></b>
+            </form>
+        </div>
+        <div class="cancle">
+            <span @click="back()">取消</span>
+        </div>
+    </div>
+    <div class="history" v-if="result===1">
+        <dl>
+            <dd v-for="(item,index) in arr">{{item}} <span @click="remove(index)"></span></dd>
+        </dl>
+    </div>
+    <div class="noHistory" v-else-if="result===2">
+        <div class="img"></div>
+        <p>您搜索的内容不存在</p>
+    </div>
+</div>
 </template>
 
 <script>
@@ -34,81 +30,87 @@ import qs from 'qs';
 export default {
     name: 'search',
     data () {
-      return {
-        result: "",
-        sousuo: "",
-        close: false,
-        arr: [],
-        list: [],
-        shopMsg: ""
-      }
+        return {
+            result: "",
+            sousuo: "",
+            close: false,
+            arr: [],
+            list: [],
+            shopMsg: ""
+        }
     },
     mounted(){
-      var that = this;
-      $(".keyword").on('keypress',function(e) {
-        var keycode = e.keyCode;
-        if(keycode=='13') {
-          e.preventDefault();
-          //请求搜索接口
-          that.bianhua()
-        }
-      })
+        var that = this;
+        $(".keyword").on('keypress',function(e) {
+            var keycode = e.keyCode;
+            if(keycode=='13') {
+                e.preventDefault();
+                //请求搜索接口
+                that.bianhua()
+            }
+        })
     },
     computed:{
 
     },
     methods:{
-      shiqu(){
-        this.close = true;
-      },
-      back(){
-        this.$router.go(-1)
-      },
-      remove(index){
-
-        if(this.arr.length <= 1){
-          this.arr.splice(index,1)
-          this.result = 0;
-        }else{
-          this.arr.splice(index,1)
-        }
-
-      },
-      clearAll(){
-        this.arr = [];
-        this.result = 0;
-      },
-      sou(){
-        this.sousuo = "";
-        this.close = false;
-      },
-      bianhua(){
-        var reg = /^\s*$/g;
-        var data = {
-          search: this.sousuo
-        }
-        if(reg.test(this.sousuo) == false){
-
-          this.$http.post(this.changeData() + "/shop/getSearch",qs.stringify(data)).then(function(res){
-            console.log(res)
-            this.shopMsg = res.data.content;
-            if(this.shopMsg.length == 0){
-                this.result = 2;
-              }else{
-              this.$router.push({path:"/lookShop",query:{search:this.sousuo}})
+        shiqu(){
+            this.close = true;
+        },
+        back(){
+            if(this.$route.query.lookShop){
+                this.$router.push({path:"/lookShop"})
+            }else if(this.$route.query.home){
+                this.$router.push({path:"/home"})
+            }else{
+                this.$router.go(-1)
             }
-          }.bind(this)).catch(function(err){
-            console.log("搜索页面错误：",err)
-          })
-        }else{
-          layer.open({
-            content: '搜索内容不能为空'
-            ,skin: 'msg'
-            ,time: 2 //2秒后自动关闭
-          });
+        },
+        remove(index){
+            if(this.arr.length <= 1){
+                this.arr.splice(index,1)
+                this.result = 0;
+            }else{
+                this.arr.splice(index,1)
+            }
+        },
+        clearAll(){
+            this.arr = [];
+            this.result = 0;
+        },
+        sou(){
+            this.sousuo = "";
+            this.close = false;
+        },
+        bianhua(){
+            var reg = /^\s*$/g;
+            var data = {
+                cityId: sessionStorage.cityId, //城市id
+                pageSize: "10", //每页数据量
+                pageNum: "1", //页码从1开始
+                search: this.sousuo,
+            }
+            if(reg.test(this.sousuo) == false){
+                this.$http.post(this.changeData() + "/shop/getShopList",qs.stringify(data)).then(function(res){
+                    // console.log(res)
+                    this.shopMsg = res.data.shopList;
+                    if(this.shopMsg.length == 0){
+                        this.result = 2;
+                    }else{
+                        sessionStorage.search = this.sousuo;
+                        this.$router.push({path:"/lookShop",query:{search:this.sousuo}})
+                    }
+                }.bind(this)).catch(function(err){
+                    console.log("搜索页面错误：",err)
+                })
+            }else{
+                layer.open({
+                    content: '搜索内容不能为空'
+                    ,skin: 'msg'
+                    ,time: 2 //2秒后自动关闭
+                });
+            }
         }
-
-      }
     },
     created() {
 
@@ -118,14 +120,13 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" type="text/scss" scoped>
-
-  .search{
-      width: 7.5rem;
+.search{
+    width: 7.5rem;
     height: 13.34rem;
     overflow: scroll;
-      margin: 0 auto;
+    margin: 0 auto;
     background: #fff;
-      position: relative;
+    position: relative;
     .title{
         height: .9rem;
         line-height: .9rem;
@@ -142,7 +143,6 @@ export default {
             height: .24rem;
             background: url("../../../static/images/search/search.png") no-repeat;
             background-size: .26rem .24rem;
-
           }
           input[type=search]::-webkit-input-placeholder{
             line-height: .34rem;
@@ -164,11 +164,11 @@ export default {
           input{
             -webkit-tap-highlight-color: rgba(0,0,0,0);
             width: 5.8rem;
-            height: 0.57rem;
-            line-height: .57rem;
+            height: 0.6rem;
+            /*line-height: .57rem;*/
             border-radius: 0.1rem;
             background: #f0f1f3;
-            padding-left: .5rem;
+            padding-left: .6rem;
           }
         }
         .cancle{

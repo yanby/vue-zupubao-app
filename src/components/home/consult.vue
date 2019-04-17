@@ -1,33 +1,46 @@
 <template>
-    <div class="consult">
-        <div class="nav clearfix">
-            <!-- <router-link to='/home'> -->
-            <img class="navBack pull-left" src="../../../static/images/common/back.png" alt="" @click="navBack()">
-            <!-- </router-link> -->
-            <p>{{this.newTitle}}</p>
-        </div>
-        <div class="wrapBox">
-            <h1>{{this.newTitle}}</h1>
-            <div class="wrap" v-html="newMain"></div>
-        </div>
+<div class="consult">
+    <div class="nav clearfix">
+        <!-- <router-link to='/home'> -->
+        <img class="navBack pull-left" src="../../../static/images/common/back.png" alt="" @click="navBack()">
+        <!-- </router-link> -->
+        <p>{{this.newTitle}}</p>
     </div>
+    <div class="wrapBox">
+        <h1>{{this.newTitle}}</h1>
+        <div class="wrap" v-html="newMain"></div>
+    </div>
+</div>
 </template>
 
 <script>
+import $ from '../../../static/js/jquery.min.js';
 import axios from 'axios';
 import qs from 'qs';
+
 export default {
     name: 'consult',
     data () {
         return {
           titleId: "",
-          newInfo: "",
           newTitle: "", // 文章标题
           newMain: "", // 文章主要内容
+          move: ""
         }
     },
     computed:{
 
+    },
+    beforeRouteEnter (to, from, next) {
+        var u = navigator.userAgent;
+        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+        // XXX: 修复iOS版微信HTML5 History兼容性问题
+        if (isiOS && to.path !== location.pathname) {
+            // 此处不可使用location.replace
+            location.assign(to.fullPath)
+        } else {
+            next()
+        }
     },
     methods:{
         navBack(){
@@ -44,6 +57,7 @@ export default {
                 }
             }
         },
+        // 获取资讯id
         listData() {
             let _this = this;
             let url = _this.changeData() + '/show/getMediaList'
@@ -54,10 +68,8 @@ export default {
                 }
             }).then(data => {
                 // console.log(data);
-                _this.newInfo = data.data.data.info;
-                _this.newTitle = data.data.data.info[0].title;
-                _this.newMain = data.data.data.info[0].content;
-                let str = data.data.data.info[0].content;
+                _this.newTitle = data.data.info.title;
+                _this.newMain = data.data.info.content;
             }).catch(err => {
                 console.log(err)
             });
@@ -69,11 +81,10 @@ export default {
             var data = {
               url : window.location.href.split('#')[0]
             }
-            this.$http.post(this.changeData() + '/shop/getwx',qs.stringify(data)).then(function(res){
-            // this.$http.post("http://tidhy.s1.natapp.cc/shop/getwx",qs.stringify(data)).then(function(res){
-              console.log(res)
+            this.$http.post(this.changeData() + '/member/weChatShare',qs.stringify(data)).then(function(res){
+              console.log(res);
               wx.config({
-                //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                // debug: true, // 开启调试模式
                 appId: res.data.appId, // 必填，公众号的唯一标识
                 timestamp: res.data.timestamp, // 必填，生成签名的时间戳
                 nonceStr: res.data.nonceStr, // 必填，生成签名的随机串
@@ -113,93 +124,38 @@ export default {
                   console.log("资讯详情错误：",err)
                 });
             },
-
-        // 调取微信分享接口
-        // wxShare() {
-        //     let _this = this
-        //     // let url = "http://tidhy.s1.natapp.cc/shop/getwx"
-        //     let url = _this.changeData() + "/shop/getwx"
-        //     axios(url,{
-        //         method: 'post',
-        //         params: {
-        //             url: window.location.href.split('#')[0],
-        //         }
-        //     }).then(data => {
-        //        console.log(data);
-        //         wx.config({
-        //             //debug: true,
-        //             appId: data.data.appId, // 和获取Ticke的必须一样------必填，公众号的唯一标识
-        //             timestamp: data.data.timestamp, // 必填，生成签名的时间戳
-        //             nonceStr: data.data.nonceStr, // 必填，生成签名的随机串
-        //             signature: data.data.signature,// 必填，签名，见附录1
-        //             //需要分享的列表项:发送给朋友，分享到朋友圈，分享到QQ，分享到QQ空间
-        //             jsApiList: [
-        //                 'onMenuShareAppMessage','onMenuShareTimeline',
-        //                 'onMenuShareQQ','onMenuShareQZone'
-        //             ]
-        //         });
-
-        //         //分享给朋友
-        //         // 将对象转成JSON.stringify(arr) json,然后在用encodeURI(）转码就行了，encodeURI(JSON.stringify(arr))
-        //         // let url = encodeURI(JSON.stringify(window.location.href.split('#')[0]));
-        //         // var getUrl = encodeURIComponent(window.location.href.split('#')[0]);
-        //         // var link1 = encodeURI(curDomain + '/christmas/service/ChristmasSockOnline.home.do?area=cd')//encodeURI(window.location.href.replace('&from=ad', '')), // 分享链接
-        //         // alert(link1);
-        //         // alert(getUrl);
-        //         // alert(window.location.href.split('#')[0]);
-        //         wx.onMenuShareAppMessage({
-        //             title: _this.newTitle, // 分享标题
-        //             desc: "优铺资讯", // 分享描述
-        //             link: window.location.href.split('#')[0], // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-        //             // link:  encodeURIComponent(window.location.href.split('#')[0]),
-        //             imgUrl: "https://up-img.oss-cn-beijing.aliyuncs.com/logo/11527824725_.pic.jpg", // 分享图标
-        //             type: '', // 分享类型,music、video或link，不填默认为link
-        //             dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
-        //             success: function (res) {
-        //               // 用户确认分享后执行的回调函数
-        //               logUtil.printLog("分享给朋友成功返回的信息为:",res);
-        //             },
-        //             cancel: function (res) {
-        //               // 用户取消分享后执行的回调函数
-        //               logUtil.printLog("取消分享给朋友返回的信息为:",res);
-        //             }
-        //         });
-
-        //         //分享到朋友圈
-        //         wx.onMenuShareTimeline({
-        //             title: _this.newTitle, // 分享标题
-        //             link: window.location.href.split('#')[0], // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-        //             imgUrl: "https://up-img.oss-cn-beijing.aliyuncs.com/logo/11527824725_.pic.jpg", // 分享图标
-        //             success: function (res) {
-        //                 // 用户确认分享后执行的回调函数
-        //                 logUtil.printLog("分享到朋友圈成功返回的信息为:",res);
-        //                 _this.showMsg("分享成功!");
-        //             },
-        //             cancel: function (res) {
-        //                 // 用户取消分享后执行的回调函数
-        //                 logUtil.printLog("取消分享到朋友圈返回的信息为:",res);
-        //             }
-        //         });
-        //     });
-        // },
     },
     mounted() {
+        //截取Url里面的参数
+        function GetRequest() {
+            var urlInfo = location.search; //获取url中"?"符后的字串
+            // alert(window.location.host)
+            // alert(urlInfo);
+            var theRequest = new Object();
+            if (urlInfo.indexOf("?") != -1) {
+                var str = urlInfo.substr(1);
+                var strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = decodeURI(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+        //通过url取数
+        var request = new Object();
+        request = GetRequest();
+        var urlId = request['id'];
+        var urlIndex = request['url'];
+        var move = request['move'];
 
+        if(move == "android"){
+            $(".nav").hide();
+            $(".wrapBox").css({"margin-top":"0"});
+            $(".wrapBox h1").css({"margin-top":".3rem"});
+        }
     },
     updated(){
       this.fenxiangFun();
-    },
-    beforeRouteEnter (to, from, next) {
-        var u = navigator.userAgent;
-        console.log(location.pathname)
-        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-        // XXX: 修复iOS版微信HTML5 History兼容性问题
-        if (isiOS && to.path !== location.pathname) {
-            // 此处不可使用location.replace
-            location.assign(to.fullPath)
-        } else {
-            next()
-        }
     },
     created() {
         this.titleId = this.$route.query.id;
@@ -223,11 +179,13 @@ export default {
         request = GetRequest();
         var urlId = request['id'];
         var urlIndex = request['url'];
+        var move = request['move'];
 
         if(urlId){
             this.source = urlId;
             $(".nav").hide();
-        }       
+        }
+
         if(urlIndex){            
             this.titleId = urlIndex;         
         }
@@ -256,6 +214,7 @@ export default {
 }
 
 .consult{
+    /*height: 100vh;*/
     background: #fff;
 }
 .nav{
@@ -287,12 +246,12 @@ export default {
 }
 .wrapBox{
     width: 6.9rem;
-    padding-left: 0.3rem;
-    padding-right: 0.3rem;
-    padding-top: .8rem;
+    margin-left: 0.3rem;
+    margin-right: 0.3rem;
+    margin-top: .8rem;
     margin-bottom: .2rem;
+    overflow: hidden;
 }
-
 h1{
     font-size: 0.34rem;
     color: #000;
@@ -300,7 +259,6 @@ h1{
     margin-top: .8rem;
     margin-bottom: .3rem;
 }
-
 
 .wrap >>> p {
     font-size: 0.3rem;
@@ -327,15 +285,3 @@ img{
     width: 6.9rem;
 }
 </style>
-
-
-
-
-
-
-
-
-
-
-
-

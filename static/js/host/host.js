@@ -11,8 +11,9 @@ exports.install = function (Vue, options) {
       var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1) //   /abc-cloud
       // alert(curWwwPath+'------'+pathName+'------'+localhostPatht+'--------'+projectName+'----------'+hostname+'-------'+protocol);
 
-      return "http://api.zpb.youpuchina.com"; //
-      //return "http://af4zzh.natappfree.cc"; // 李冰
-      //return "http://api.zpb.yingshangchina.com"; // 李冰
+      // return "http://192.168.1.139:8080"; // 本地测式地址
+      // return "http://test-api.zpb.youpuchina.com"; // 租铺宝重构测试地址
+      return "http://api.zpb.youpuchina.com"; // 租铺宝重构正式地址
+
     }
 };

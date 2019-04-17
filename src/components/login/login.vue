@@ -3,7 +3,7 @@
         <div class="loginMain">
             <div class="nav clearfix">
                 <img class="navBack pull-left" src="../../../static/images/common/back-write.png" alt="" @click="navBack()">
-                <h2 class="navTitle pull-left">登录／注册</h2>
+                <h2 class="navTitle pull-left">登录</h2>
             </div>
             <div class="logo"></div>
             <div class="dInput clearfix">
@@ -20,8 +20,11 @@
                 </div>
             </div>
             <div class="btn">
-                <p>无需注册，输入手机号即可登录</p>
-                <div class="login-btn" @click="loginBtn($event)">登录／注册</div>
+                <!-- <p>无需注册，输入手机号即可登录</p> -->
+                <div class="login-btn" @click="loginBtn($event)">登录</div>
+            </div>
+            <div class="prompt">
+                <!-- <p>温馨提示：租铺宝目前仅开通<span>北京、青岛</span>地区服务，其他城市即刻开通，请持续关注</p> -->
             </div>
         </div>
     </div>
@@ -44,14 +47,17 @@ export default {
             formMess:{
                 email:this.email,
                 phone:this.phone
-            }
+            },
+            urlId: "",
+            urlPrice: "",
+            urlType: "",
+            goUrl: ""
         }
     },
     computed:{
 
     },
     methods:{
-        //
         keyVal(e) {
             var phoneNum = this.phoneVal.trim();
             //如果是删除按键，则什么都不做
@@ -76,14 +82,15 @@ export default {
 
                 // 接口调用
                 let _this = this
-                let url =  _this.changeData() + '/user/sendsms'
+                let url =  _this.changeData() + '/sendsms'
                 let str = _this.phoneVal;
-
                 let num = str.replace(/[^0-9]/ig,"");
+
                 axios(url,{
                     method: 'post',
                     params: {
-                        phoneNumber: num
+                        phoneNumber: num,
+                        cityId: sessionStorage.cityId  //市id
                     }
                 }).then(data => {
                     // console.log(data);
@@ -92,6 +99,7 @@ export default {
                 });
             }
         },
+
         // 倒计时
         timer() {
             if (this.time > 0) {
@@ -134,66 +142,140 @@ export default {
                 let num = str.replace(/[^0-9]/ig,"");
                 axios(url,{
                     method: 'post',
-                    params:
-                    {
+                    params: {
                         account: num,
                         password: _this.securityCode,
-                        channel: 2
+                        channel: 3,
+                        provinceId: sessionStorage.provinceId,  //省id
+                        cityId: sessionStorage.cityId  //市id
                     }
                 }).then(data => {
-                    console.log(data);
-                    let tel = data.data.phone
-                    if(data.data.code == 200){
+                    // console.log(data);
+                    if(data.data.code == 101){
                         layer.open({
                             content: '登录成功',
                             skin: 'msg',
                             time: 2
                         });
 
+                        let tel = data.data.phone;
                         window.localStorage.setItem("iphone",tel);
                         window.localStorage.setItem("token",data.data.token);
                         window.localStorage.setItem("pvCount",data.data.pvCount);
                         window.localStorage.setItem("memberType",data.data.memberType);
 
                         _this.$store.commit("login",data.data.token);
-                        _this.$router.go(-1);
-                    }else if(data.data.code == 500){
-                      layer.open({
-                        content: '请输入正确验证码',
-                        skin: 'msg',
-                        time: 2
-                      });
-                    } else{
+
+                        var typeId = this.$route.query.shopId;
+                        if(this.$route.query.shopDetail){
+                            this.$router.push({path: '/shopDetail',query:{shopId: typeId}});
+                        }else if(this.urlType == "wantedDetail"){
+                            this.$router.push({path: '/wantedDetail',query:{id: this.$route.query.id}});
+                        }else if(this.urlType == "seekShop"){
+                            this.$router.push({path:"/payment",query:{"id":this.urlId,"price":this.urlPrice,"seekShop":"1"}});
+                        }else if(this.urlType == "turnShop"){
+                            this.$router.push({path:"/payment",query:{"id":this.urlId,"price":this.urlPrice,"turnShop":"1"}});
+                        }else if(this.urlType == "message"){
+                            this.$router.push({path:"/message"});
+                        }else if(this.urlType == "publish"){
+                            this.$router.push({path: '/publish',query:{url: _this.goUrl}});
+                        }else if(this.urlType == "home"){
+                            this.$router.push({path: '/home'});
+                        }else {
+                            this.$router.push({path: '/mine'});
+                        }
+                        // 储存cookie
+                        try{
+                            function setCookie(name,value){
+                                var Days = 30;
+                                var exp = new Date();
+                                exp.setTime(exp.getTime() + Days*24*60*60*1000);
+                                // 正式环境
+                                document.cookie = name + "="+ escape (value) + ";path=/;domain=.youpuchina.com;expires=" + exp.toGMTString();
+                                // 测试环境
+                                // document.cookie = name + "="+ escape (value) + ";path=/;domain=.yingshangchina.com;expires=" + exp.toGMTString();
+                            }
+                            setCookie("iphone",tel);
+                            setCookie("token",data.data.token);
+                            cookie.setMaxAge(365*24*60*60);
+                        }catch(err){
+                            console.log(err)
+                        }
+                        
+                    }else if(data.data.code == 103){
                         layer.open({
-                            content: '登录失败',
+                            content: '请输入正确验证码',
+                            skin: 'msg',
+                            time: 2
+                        });
+                    }else{
+                        layer.open({
+                            content: '系统繁忙，请稍后再试',
                             skin: 'msg',
                             time: 2
                         });
                     }
+
                 }).catch(err => {
                     console.log(err)
                 });
             }
         },
         navBack(){
-            this.$router.go(-1)
+            var typeId = this.$route.query.shopId;
+
+            if(this.$route.query.shopDetail){
+                this.$router.push({path: '/shopDetail',query:{shopId: typeId}});
+            }else if(this.urlType == "wantedDetail"){
+              this.$router.push({path: '/wantedDetail',query:{id: this.$route.query.id}});
+            }else if(this.urlType == "seekShop"){
+                this.$router.push({path: '/seekShop'});
+            }else if(this.urlType == "turnShop"){
+                this.$router.push({path: '/turnShop'});
+            }else if(this.urlType == "message"){
+                this.$router.go(-2);
+            }else if(this.urlType == "publish"){
+                this.$router.push({path: '/publish',query:{url: this.goUrl}});
+            }else if(this.urlType == "home"){
+                this.$router.push({path: '/home'});
+            }else{
+                this.$router.push({path: '/mine'});
+            }
+
         },
-
-
     },
     created() {
 
-
+    },
+    mounted() {
+        //截取Url里面的参数
+        function GetRequest() {
+            var url = location.search; //获取url中"?"符后的字串
+            // alert(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                // alert(str);
+                var strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = decodeURI(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+        var request = new Object();
+        request = GetRequest();
+        this.urlId = request['id'];
+        this.urlPrice = request['price'];
+        this.urlType = request['urlType'];
+        this.goUrl = request['url'];
     },
     watch: {
         phoneVal(){
-
             if(this.phoneVal.length == 13){
                 this.chengaColor = true;
-
             }else{
                 this.chengaColor = false;
-
             }
             let reg = /^1([38]\d|4[57]|5[0-35-9]|7[01-8])(\-\d{4}){2}$/;
 
@@ -201,11 +283,8 @@ export default {
                 this.chengaColor = false;
             }else{
                 this.chengaColor = true;
-
             }
-
         }
-
     }
 }
 </script>
@@ -229,6 +308,7 @@ export default {
 }
 .loginMain{
     width: 7.5rem;
+    height: 13.34rem;
     margin: 0 auto;
     background: url("../../../static/images/login/loginBg.png") no-repeat top center;
     background-size: 7.5rem 13.34rem;
@@ -285,10 +365,10 @@ export default {
     border-bottom: 1px solid #ccc;
 }
 .dInput .input1 input{
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
     height: 0.68rem;
     width: 5.5rem;
-  line-height: .7rem;
+    line-height: .7rem;
     background: transparent;
     font-size: 0.28rem;
     color: #fff;
@@ -333,7 +413,7 @@ input:-ms-input-placeholder{  /* Internet Explorer 10-11 */
 .btn{
     margin-top: 2rem;
     text-align: center;
-    padding-bottom: 5rem;
+
 }
 .btn p{
     font-size: 0.26rem;
@@ -350,7 +430,21 @@ input:-ms-input-placeholder{  /* Internet Explorer 10-11 */
     font-size: 0.34rem;
     line-height: 0.88rem;
     color: #fff;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+.prompt{
+    width: 6rem;
+    margin: .45rem auto 0;
+    padding-bottom: 4.5rem;
+    text-align: center;
+    p{
+        color: #fff;
+        font-size: .26rem;
+        span{
+            font-size: .3rem;
+
+        }
+    }
 }
 </style>
 

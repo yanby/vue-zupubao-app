@@ -25,6 +25,16 @@ function GetRequest() {
   return theRequest;
 }
 
+//正则验证手机号
+function isPoneAvailable(str) {
+  var myreg = /^[1][3,4,5,7,8][0-9]{9}$/;
+  if (!myreg.test(str)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 
 //获得年月日      得到日期oTime
 function getMyDate(str){
